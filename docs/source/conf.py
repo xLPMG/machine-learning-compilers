@@ -16,8 +16,8 @@ if not os.path.exists( "_build/xml/" ):
                      shell=True )
 
 project = 'Machine Learning Compilers'
-copyright = f'{date.today().year}, Lucas Obitz, Luca-Philipp Krumbach'
-author = 'Lucas Obitz, Luca-Philipp Krumbach'
+copyright = f'{date.today().year}, Lucas Obitz, Luca-Philipp Grumbach'
+author = 'Lucas Obitz, Luca-Philipp Grumbach'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

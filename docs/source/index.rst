@@ -3,15 +3,19 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Machine Learning Compilers documentation
-========================================
-
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
-
+Machine Learning Compilers
+==========================
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: PROJECT OVERVIEW
+   :glob:
 
+   project_overview/01_project_information.rst
+
+.. toctree::
+   :maxdepth: 2
+   :caption: SUBMISSIONS
+   :glob:
+
+   submissions/01_assembly.rst
