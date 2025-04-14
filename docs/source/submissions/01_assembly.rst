@@ -4,7 +4,17 @@ Assembly
 Hello Assembly
 --------------
 
-Information about the given data files.
+We have been given two files:
+
+.. literalinclude:: ../../../src/submissions/01_submission/data/hello_assembly.c
+    :language: c
+    :linenos:
+    :caption: hello_assembly.c
+
+.. literalinclude:: ../../../src/submissions/01_submission/data/add_values.s 
+    :language: asm
+    :linenos:
+    :caption: add_values.s
 
 Task 1
 ^^^^^^
@@ -110,5 +120,129 @@ The output is then:
     Hello Assembly Language!
     ... returned from function call!
 
+
 Assembly Function
 -----------------
+
+Now we want to work with the :code:`add_values.s` file.
+
+Task 1
+^^^^^^
+
+As a first step we want to assemble the file. We can do that by calling:
+
+.. code-block:: bash
+
+    as add_values.s -o add_values.o
+
+Task 2
+^^^^^^
+
+With :code:`add_values.o` we are now creating different files:
+
+To get a hexadecimal dump we used:
+
+.. code-block:: bash
+
+    hexdump add_values.o > hexdump_add_values.hex
+
+.. literalinclude:: ../../../src/submissions/01_submission/02_task/hexdump_add_values.hex
+    :language: none
+    :linenos:
+    :caption: Hexadecimal dump
+
+To get the section headers we used:
+
+.. code-block:: bash
+
+    readelf -S add_values.o > sec_headers_add_values.relf
+
+.. literalinclude:: ../../../src/submissions/01_submission/02_task/sec_headers_add_values.relf
+    :language: none
+    :linenos:
+    :caption: Section headers
+
+To get the disassembled file we used:
+
+.. code-block:: bash
+
+    objdump --syms -S -d add_values.o > dis_add_values.dis
+
+.. literalinclude:: ../../../src/submissions/01_submission/02_task/dis_add_values.dis
+    :language: none
+    :linenos:
+    :caption: Disassembled file
+
+Task 3
+^^^^^^
+
+The *size* of the :code:`.text` section can be found in the section headers in *line 9*.
+
+.. literalinclude:: ../../../src/submissions/01_submission/02_task/sec_headers_add_values.relf
+    :language: none
+    :lines: 8-9
+    :caption: Lines 8 and 9
+
+The *size* of the text section is :code:`0000000000000020` or :code:`0x20` which translates to 32 bytes.
+These 32 bytes correspond to 8 assembly instructions (each 4 bytes) that the function :code:`add_values` performs.
+
+.. literalinclude:: ../../../src/submissions/01_submission/02_task/dis_add_values.dis
+    :language: none
+    :lines: 15-22
+    :caption: Lines 8 and 9
+
+Starting at :code:`0x00`, incrementing always by 4 bytes per instruction (performing 8 of those increments), 
+we ultimately finish at the :code:`ret` instruction located at :code:`0xc1`, which marks the end of the :code:`.text` section.
+Therefore, from :code:`0x00` to :code:`0xc1` there are exactly 8 instructions covered, which equal a *size* of 32 bytes.
+
+Task 4
+^^^^^^
+
+To test the functionality of the :code:`add_values` function we implemented a C++ driver:
+
+.. literalinclude:: ../../../src/submissions/01_submission/02_task/driver_add_values.cpp
+    :language: cpp
+    :linenos:
+    :caption: driver_add_values.cpp
+
+To test our function we now could call:
+
+.. code-block:: bash
+
+    g++ driver_add_values.cpp add_values.s -o driver_add_values
+
+Where :code:`driver_add_values` results in:
+
+.. code-block:: bash
+
+    Calling assembly 'add_value' function ...
+    l_data_1 / l_value_2 / l_value_o
+    4 / 7 / 11
+
+Task 5
+^^^^^^
+
+To get an idea how the contents of the general purpose registers look like, when calling the :code:`add_values` function
+we stepped through a function call using the GNU Project Debugger.
+
+To get the correct view in the GNU Project Debugger we call:
+
+.. code-block:: bash
+
+    gdb ./driver_add_values
+    lay next
+
+After :code:`lay next` we pressed enter 3 times to get to the register view in combination with the assembly instructions.
+To start the debugging process we call:
+
+.. code-block:: bash
+    
+    break add_values
+    run
+
+After starting the debugging process we then proceeded to skip from instruction to instruction using :code:`nexti`.
+
+.. raw:: html
+
+    <embed src="../_static/GDB_add_values.pdf" width="100%" height="600px" type="application/pdf">
+
