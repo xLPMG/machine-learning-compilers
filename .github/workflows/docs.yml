@@ -19,12 +19,12 @@ jobs:
     runs-on: macos-latest
     if: github.ref == 'refs/heads/main'
     steps:
-    - name: Requirements
-      run: brew install doxygen
+    - name: Checkout Repository
+      uses: actions/checkout@1.0.0
+    - name: Install Requirements
+      run: brew install --formula doxygen
         && cd docs
         && pip install -r requirements.txt
-    - name: Checkout repo
-      uses: actions/checkout@1.0.0
     - name: Build docs
       run: cd docs
         && make html
