@@ -1,0 +1,6 @@
+# Build & System files
+build/
+_build/
+
+.DS_STORE
+python_env
