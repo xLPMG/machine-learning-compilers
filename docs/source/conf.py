@@ -24,6 +24,7 @@ author = 'Lucas Obitz, Luca-Philipp Grumbach'
 
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx_copybutton',
     'breathe'
 ]
 
