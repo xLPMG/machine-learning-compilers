@@ -10,9 +10,9 @@
     */
 copy_asm_0:
     // save frame pointer and link register
-    stp     x29, x30, [sp, #-16]!
+    stp x29, x30, [sp, #-16]!
     // update frame pointer to current stack pointer
-    mov     x29, sp
+    mov x29, sp
 
     // b[0] = a[0]
     ldr w2, [x0]
@@ -37,7 +37,7 @@ copy_asm_0:
     str w2, [x1, #24]
 
     // restore frame pointer and link register
-    ldp     x29, x30, [sp], #16
+    ldp x29, x30, [sp], #16
 
     ret
 
@@ -55,9 +55,9 @@ copy_asm_0:
     */
 copy_asm_1:
     // save frame pointer and link register
-    stp     x29, x30, [sp, #-16]!
+    stp x29, x30, [sp, #-16]!
     // update frame pointer to current stack pointer
-    mov     x29, sp
+    mov x29, sp
     // number of elements copied
     mov x3, #0
     // byte offset for array
@@ -75,6 +75,6 @@ loop:
     // if not, loop again
     blt loop
     // restore frame pointer and link register
-    ldp     x29, x30, [sp], #16
+    ldp x29, x30, [sp], #16
 
     ret
