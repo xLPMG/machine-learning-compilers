@@ -9,6 +9,11 @@
     * @param x1: address of the destination array.
     */
 copy_asm_0:
+    // save frame pointer and link register
+    stp     x29, x30, [sp, #-16]!
+    // update frame pointer to current stack pointer
+    mov     x29, sp
+
     // b[0] = a[0]
     ldr w2, [x0]
     str w2, [x1]
@@ -30,6 +35,10 @@ copy_asm_0:
     // b[6] = a[6]
     ldr w2, [x0, #24]
     str w2, [x1, #24]
+
+    // restore frame pointer and link register
+    ldp     x29, x30, [sp], #16
+
     ret
 
 
@@ -45,6 +54,10 @@ copy_asm_0:
     * @param x2: address of the destination array.
     */
 copy_asm_1:
+    // save frame pointer and link register
+    stp     x29, x30, [sp, #-16]!
+    // update frame pointer to current stack pointer
+    mov     x29, sp
     // number of elements copied
     mov x3, #0
     // byte offset for array
@@ -61,4 +74,7 @@ loop:
     cmp x3, x0
     // if not, loop again
     blt loop
+    // restore frame pointer and link register
+    ldp     x29, x30, [sp], #16
+
     ret
