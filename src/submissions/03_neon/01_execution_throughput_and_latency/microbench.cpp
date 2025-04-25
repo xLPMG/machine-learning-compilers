@@ -147,9 +147,9 @@ int main()
     /*
     std::cout << "\nBenchmarking FMADD throughput ...\n";
     benchmark_thr( l_iter, fmadd );
+    */
 
-
-    l_iter = 150000000;
+    l_iter = 1500000;
     std::string fmlaS( "FMLA_Source" );
     std::string fmlaD( "FMLA_Destination" );
 
@@ -158,7 +158,6 @@ int main()
 
     std::cout << "\nBenchmarking MUL latency ...\n";
     benchmark_lat( l_iter, fmlaD );
-    */
 
     return 0;
 }

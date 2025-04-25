@@ -1,7 +1,7 @@
     .text
-    .type fmla_4s_lat_src, %function
-    .global fmla_4s_lat_src
-fmla_4s_lat_src:
+    .type fmla_4s_source_lat_instr, %function
+    .global fmla_4s_source_lat_instr
+fmla_4s_source_lat_instr:
     // Procedure Call Standard
     stp	x29, x30, [sp, #-16]!
     mov	x29, sp
