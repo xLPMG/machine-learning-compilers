@@ -3,5 +3,6 @@ build/
 _build/
 *.o
 
+.vscode
 .DS_STORE
 python_env
