@@ -14,9 +14,11 @@ extern "C" {
     // void fmadd_instr( int64_t l_n );
 
     // latency
-    // void fmla_4s_source_lat_instr( int64_t l_n );
+    void fmla_4s_source_lat_instr( int64_t l_n,
+                                   float32x4_t * l_a );
 
-    // void fmla_4s_dest_lat_instr( int64_t l_n );
+    void fmla_4s_dest_lat_instr( int64_t l_n,
+                                 float32x4_t * l_a );
 }
 
 float32x4_t g_4s_registers[32];
@@ -101,22 +103,20 @@ void benchmark_lat( int64_t n,
     int res = fmuls.compare( instruction );
 
     // time measuring
-    /*
     if ( res == 0 )
     {
         auto l_start_time = std::chrono::high_resolution_clock::now();
-        fmla_4s_source_lat_instr( n );
+        fmla_4s_source_lat_instr( n, g_4s_registers );
         auto l_end_time = std::chrono::high_resolution_clock::now();
         elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(l_end_time - l_start_time).count() / 1e6;
     }
     else 
     {
         auto l_start_time = std::chrono::high_resolution_clock::now();
-        fmla_4s_dest_lat_instr( n );
+        fmla_4s_dest_lat_instr( n, g_4s_registers );
         auto l_end_time = std::chrono::high_resolution_clock::now();
         elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(l_end_time - l_start_time).count() / 1e6;
     }
-    */
 
     double totalOps = n * 32 * 100;
     double opsPerSec = totalOps / elapsedTime;
