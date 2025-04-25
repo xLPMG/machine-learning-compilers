@@ -1,0 +1,39 @@
+Benchmarking FMLA 4s throughput ...
+-----------------------------------------------
+Measuring throughput for Instruction
+Total time (s):   1.97516
+Instructions per Second:   1.62012e+10
+Estimated GOPS:   16.2012 GigaOps/sec
+-----------------------------------------------
+
+Benchmarking FMLA 2s throughput ...
+-----------------------------------------------
+Measuring throughput for Instruction
+Total time (s):   2.55541
+Instructions per Second:   1.25224e+10
+Estimated GOPS:   12.5224 GigaOps/sec
+-----------------------------------------------
+
+Benchmarking FMADD throughput ...
+-----------------------------------------------
+Measuring throughput for Instruction
+Total time (s):   3.56143
+Instructions per Second:   8.98515e+09
+Estimated GOPS:   8.98515 GigaOps/sec
+-----------------------------------------------
+
+Benchmarking ADD latency ...
+-----------------------------------------------
+Measuring latency for FMLA_SourceInstruction
+Total time (s):   3.351
+Instructions per Second:   1.43241e+09
+Estimated GOPS:   1.43241 GigaOps/sec
+-----------------------------------------------
+
+Benchmarking MUL latency ...
+-----------------------------------------------
+Measuring latency for FMLA_DestinationInstruction
+Total time (s):   3.3831
+Instructions per Second:   1.41882e+09
+Estimated GOPS:   1.41882 GigaOps/sec
+-----------------------------------------------

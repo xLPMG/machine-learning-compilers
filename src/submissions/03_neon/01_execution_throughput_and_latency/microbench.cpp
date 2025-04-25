@@ -11,7 +11,8 @@ extern "C" {
     void fmla_2s_instr( int64_t l_n,
                         float32x2_t * l_a );
 
-    // void fmadd_instr( int64_t l_n );
+    void fmadd_instr( int64_t l_n,
+                      float * l_a );
 
     // latency
     void fmla_4s_source_lat_instr( int64_t l_n,
@@ -23,6 +24,7 @@ extern "C" {
 
 float32x4_t g_4s_registers[32];
 float32x2_t g_2s_registers[32];
+float       g_registers[32];
 
 void initialize_registers() 
 {
@@ -66,15 +68,13 @@ void benchmark_thr( int64_t n,
         auto l_end_time = std::chrono::high_resolution_clock::now();
         elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>( l_end_time - l_start_time ).count() / 1e6;
     }
-    /*
     else
     {
         auto l_start_time = std::chrono::high_resolution_clock::now();
-        fmadd_instr( n );
+        fmadd_instr( n, g_registers );
         auto l_end_time = std::chrono::high_resolution_clock::now();
         elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>( l_end_time - l_start_time ).count() / 1e6;
     }
-    */
     
     double totalOps = n * 32 * 100;
     double opsPerSec = totalOps / elapsedTime;
@@ -144,10 +144,9 @@ int main()
     std::cout << "\nBenchmarking FMLA 2s throughput ...\n";
     benchmark_thr( l_iter, fmla2 );
 
-    /*
     std::cout << "\nBenchmarking FMADD throughput ...\n";
     benchmark_thr( l_iter, fmadd );
-    */
+
 
     l_iter = 1500000;
     std::string fmlaS( "FMLA_Source" );
