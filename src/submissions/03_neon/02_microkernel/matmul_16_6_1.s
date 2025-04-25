@@ -1,5 +1,6 @@
     .text
-    .global _matmul_16_6_1
+    .type matmul_16_6_1, %function
+    .global matmul_16_6_1
     /*
     * Computes C+=AB for three matrices 
     * with the dimensions M=16, N=6, and K=1.
@@ -11,7 +12,7 @@
     * @param x4 leading dimension of B.
     * @param x5 leading dimension of C.
     */
-_matmul_16_6_1:
+matmul_16_6_1:
     // save frame pointer and link register
     stp fp, lr, [sp, #-16]!
     // update frame pointer to current stack pointer
