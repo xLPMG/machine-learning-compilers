@@ -28,7 +28,7 @@ int main()
 
     float A[M * K];
     float B[K * N];
-    float C[M * N];
+    float C[M * N] = {0.0f};
 
     // Initialize matrices
     for (int i = 0; i < M * K; ++i)
@@ -39,7 +39,6 @@ int main()
     {
         B[j] = static_cast<float>(j);
     }
-    std::memset(C, 0, sizeof(C));
 
     // Print matrix A
     std::cout << "Matrix A:" << std::endl;
