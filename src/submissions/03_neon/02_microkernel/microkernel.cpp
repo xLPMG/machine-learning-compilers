@@ -40,26 +40,26 @@ int main()
         B[j] = static_cast<float>(j);
     }
 
-    // Print matrix A
-    std::cout << "Matrix A:" << std::endl;
-    for (int i = 0; i < M; ++i)
+    // Print matrix A in column-major order
+    std::cout << "Matrix A (Column-Major Order):" << std::endl;
+    for (int row = 0; row < M; ++row)
     {
-        for (int j = 0; j < K; ++j)
+        for (int col = 0; col < K; ++col)
         {
-            std::cout << A[i * K + j] << " ";
+            std::cout << A[col * M + row] << " ";
         }
-        std::cout << "\n";
+        std::cout << std::endl;
     }
 
-    // Print matrix B
-    std::cout << "Matrix B:" << std::endl;
-    for (int i = 0; i < K; ++i)
+    // Print matrix B in column-major order
+    std::cout << "Matrix B (Column-Major Order):" << std::endl;
+    for (int row = 0; row < K; ++row)
     {
-        for (int j = 0; j < N; ++j)
+        for (int col = 0; col < N; ++col)
         {
-            std::cout << B[i * N + j] << " ";
+            std::cout << B[col * K + row] << " ";
         }
-        std::cout << "\n";
+        std::cout << std::endl;
     }
 
     matmul_16_6_1(A,
@@ -69,13 +69,13 @@ int main()
                   1,
                   16);
 
-    // Print the result
-    std::cout << "Result Matrix C:" << std::endl;
-    for (int row = 0; row < M; row++)
+    // Print matrix C in column-major order
+    std::cout << "Matrix C (Column-Major Order):" << std::endl;
+    for (int row = 0; row < N; ++row)
     {
-        for (int col = 0; col < N; col++)
+        for (int col = 0; col < M; ++col)
         {
-            std::cout << C[col * M + row] << " ";
+            std::cout << C[col * N + row] << " ";
         }
         std::cout << std::endl;
     }
