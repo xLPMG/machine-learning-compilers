@@ -22,7 +22,7 @@ Instructions per Second:   1.81345e+10
 Estimated GOPS:   18.1345 GFLOPs/sec
 -----------------------------------------------
 
-Benchmarking ADD latency ...
+Benchmarking FMLA 4s source register latency ...
 -----------------------------------------------
 Measuring latency for FMLA_SourceInstruction
 Total time (s):   3.30277
@@ -30,7 +30,7 @@ Instructions per Second:   1.16266e+10
 Estimated GOPS:   11.6266 GFLOPs/sec
 -----------------------------------------------
 
-Benchmarking MUL latency ...
+Benchmarking FMLA 4s destination register latency ...
 -----------------------------------------------
 Measuring latency for FMLA_DestinationInstruction
 Total time (s):   3.30207
