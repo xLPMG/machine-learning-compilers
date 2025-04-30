@@ -76,3 +76,30 @@ using only scalar operations.
 
 Latency
 ^^^^^^^^
+
+To measure the execution latency for FMLA (vector) instructions with arrangement specifier ``4S``, we examined two scenarios:
+
+1. Each instruction depends on the destination register and one of the source register of the previous instruction
+
+.. literalinclude:: ../../../src/submissions/03_neon/01_execution_throughput_and_latency/fmla_4s_source_lat_instr.s
+    :language: asm
+    :lines: 33-36
+    :caption: fmla instructions with dependencies on the destination register and one of the source registers
+
+2. Each instruction depends only on the destination register of the previous instruction
+
+.. literalinclude:: ../../../src/submissions/03_neon/01_execution_throughput_and_latency/fmla_4s_dest_lat_instr.s
+    :language: asm
+    :lines: 33-36
+    :caption: fmla instructions with dependencies on the destination register
+
+Both files contain 32 fmla instructions each, which are executed 100 times. The results of our benchmark is shown below:
+
+.. literalinclude:: ../../../src/submissions/03_neon/01_execution_throughput_and_latency/benchmarking_results.txt
+    :language: text
+    :lines: 25-39
+    :caption: Latency results for the two scenarios
+
+We can see that both scenarios have similar results, which is why we computed the latency only for the first scenario.
+
+We measured :math:`1.16266 \times 10^{10}` instructions per second, which means that the latency of the FMLA (vector) instruction with arrangement specifier ``4S`` is approximately :math:`\frac{1}{1.16266 \times 10^{10}} \approx 8.6 \times 10^{-11}` seconds. Using a known clock frequency of 4.4 GHz, we computed the latency as :math:`8.6 \times 10^{-11} \times 4.4 \times 10^9 = 0.3784` cycles.
