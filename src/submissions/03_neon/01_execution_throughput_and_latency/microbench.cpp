@@ -193,7 +193,7 @@ int main()
     std::cout << "\nBenchmarking FMLA 4s source register latency ...\n";
     benchmark_lat( l_iter, fmlaS );
 
-    std::cout << "\nBenchmarking MUL destination register latency ...\n";
+    std::cout << "\nBenchmarking FMLA 4s destination register latency ...\n";
     benchmark_lat( l_iter, fmlaD );
 
     return 0;
