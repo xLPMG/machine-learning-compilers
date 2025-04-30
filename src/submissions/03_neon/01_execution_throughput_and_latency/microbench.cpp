@@ -53,37 +53,65 @@ void benchmark_thr( int64_t n,
     std::string fmla2( "FMLA_2s" );
     int res_2 = fmla2.compare( instruction );
 
+    double totalOps = 0.0;
+
     // Time measuring
     if ( res_1 == 0 )
     {
+        // Warmup
+        fmla_4s_instr( 100, g_4s_registers );
+
         auto l_start_time = std::chrono::high_resolution_clock::now();
         fmla_4s_instr( n, g_4s_registers );
         auto l_end_time = std::chrono::high_resolution_clock::now();
         elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>( l_end_time - l_start_time ).count() / 1e6;
+
+        // per FMLA: 4 Muls, 4 Adds
+        // 32 fmla
+        // rept 100
+        // n: loop iterations
+        totalOps = (2 * 4) * 32 * 100 * n;
     }
     else if ( res_2 == 0 )
     {
+        // Warmup
+        fmla_2s_instr( 100, g_2s_registers );
+
         auto l_start_time = std::chrono::high_resolution_clock::now();
         fmla_2s_instr( n, g_2s_registers );
         auto l_end_time = std::chrono::high_resolution_clock::now();
         elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>( l_end_time - l_start_time ).count() / 1e6;
+
+        // per FMLA: 2 Muls, 2 Adds
+        // 32 fmla
+        // rept 100
+        // n: loop iterations
+        totalOps = (2 * 2) * 32 * 100 * n;
     }
     else
     {
+        // Warmup
+        fmadd_instr( 100, g_registers );
+
         auto l_start_time = std::chrono::high_resolution_clock::now();
         fmadd_instr( n, g_registers );
         auto l_end_time = std::chrono::high_resolution_clock::now();
         elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>( l_end_time - l_start_time ).count() / 1e6;
+
+        // per FMADD: 1 Mul, 1 Add
+        // 32 fmadd
+        // rept 100
+        // n: loop iterations
+        totalOps = (2 * 1) * 32 * 100 * n;
     }
     
-    double totalOps = n * 32 * 100;
     double opsPerSec = totalOps / elapsedTime;
-    double gops = opsPerSec / 1e9;
+    double gflops = totalOps / (elapsedTime * 1e9);
 
     std::cout << "Measuring throughput for " << "Instruction\n";
     std::cout << "Total time (s):   " << elapsedTime << "\n";
     std::cout << "Instructions per Second:   " << opsPerSec << "\n";
-    std::cout << "Estimated GOPS:   " << gops << " GigaOps/sec\n";
+    std::cout << "Estimated GOPS:   " << gflops << " GFLOPs/sec\n";
     std::cout << "-----------------------------------------------\n";
 }
 
@@ -105,6 +133,9 @@ void benchmark_lat( int64_t n,
     // time measuring
     if ( res == 0 )
     {
+        // Warmup
+        fmla_4s_source_lat_instr( 100, g_4s_registers );
+
         auto l_start_time = std::chrono::high_resolution_clock::now();
         fmla_4s_source_lat_instr( n, g_4s_registers );
         auto l_end_time = std::chrono::high_resolution_clock::now();
@@ -112,20 +143,27 @@ void benchmark_lat( int64_t n,
     }
     else 
     {
+        // Warmup
+        fmla_4s_dest_lat_instr( 100, g_4s_registers );
+
         auto l_start_time = std::chrono::high_resolution_clock::now();
         fmla_4s_dest_lat_instr( n, g_4s_registers );
         auto l_end_time = std::chrono::high_resolution_clock::now();
         elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(l_end_time - l_start_time).count() / 1e6;
     }
 
-    double totalOps = n * 32 * 100;
+    // per FMLA: 4 Muls, 4 Adds
+    // 32 fmla
+    // rept 100
+    // n: loop iterations
+    double totalOps = (2 * 4) * 32 * 100 * n;
     double opsPerSec = totalOps / elapsedTime;
-    double gops = opsPerSec / 1e9;
+    double gflops = totalOps / (elapsedTime * 1e9);
 
     std::cout << "Measuring latency for " << instruction << "Instruction\n";
     std::cout << "Total time (s):   " << elapsedTime << "\n";
     std::cout << "Instructions per Second:   " << opsPerSec << "\n";
-    std::cout << "Estimated GOPS:   " << gops << " GigaOps/sec\n";
+    std::cout << "Estimated GOPS:   " << gflops << " GFLOPs/sec\n";
     std::cout << "-----------------------------------------------\n";
 }
 
@@ -152,10 +190,10 @@ int main()
     std::string fmlaS( "FMLA_Source" );
     std::string fmlaD( "FMLA_Destination" );
 
-    std::cout << "\nBenchmarking ADD latency ...\n";
+    std::cout << "\nBenchmarking FMLA 4s source register latency ...\n";
     benchmark_lat( l_iter, fmlaS );
 
-    std::cout << "\nBenchmarking MUL latency ...\n";
+    std::cout << "\nBenchmarking MUL destination register latency ...\n";
     benchmark_lat( l_iter, fmlaD );
 
     return 0;
