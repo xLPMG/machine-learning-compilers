@@ -75,7 +75,7 @@ v1_matmul_16_6_1:
     ldp q26, q27, [x7, #32]
 
     /*
-     * Load column of B (0 - 2)
+     * Load 3 elements of B
      */
     mov x6, x1              // current column of B
 
@@ -107,7 +107,7 @@ v1_matmul_16_6_1:
     fmla v15.4s, v3.4s, v30.s[0]
 
     /*
-     * Load next column of B (3 - 5)
+     * Load last 3 elements of B
      */
     ldr s31, [x6]           // Column B(3)
     add x6, x6, x4

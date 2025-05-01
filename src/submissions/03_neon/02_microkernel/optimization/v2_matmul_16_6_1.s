@@ -46,7 +46,7 @@ v2_matmul_16_6_1:
     ldp q2, q3, [x0, #32]
 
     /*
-     * Load matrix C (0 - 5)
+     * Load matrix C
      */
     mov x7, x2              // current column of C
 
