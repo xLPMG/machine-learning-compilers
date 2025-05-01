@@ -78,7 +78,7 @@ v2_matmul_16_6_1:
      */
     mov x6, x1              // current column of B
 
-    ldr s28, [x6]           // Column B(0)
+    ldr s28, [x6]
     add x6, x6, x4
     
     /*
@@ -93,7 +93,7 @@ v2_matmul_16_6_1:
      * Load column of B (2 / 6)
      */
     ldr s29, [x6]
-    add x6, x6, x4          // Column B(1)
+    add x6, x6, x4
 
     /*
      * Multiply and accumulate (2 / 6)

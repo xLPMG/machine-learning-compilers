@@ -53,6 +53,8 @@ void benchmark_thr( int64_t loop_iters,
     std::string v3_matmul( "v3_matmul" );
     int res_3 = v3_matmul.compare( instruction );
 
+    double elapsedTime = 1;
+
     // Time measuring
     if ( res_1 == 0 )
     {
@@ -78,20 +80,7 @@ void benchmark_thr( int64_t loop_iters,
                               16 );
         }
         auto l_end_time = std::chrono::high_resolution_clock::now();
-        double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>( l_end_time - l_start_time ).count() / 1e6;
-
-        double totalOps = ( 6 * 16 ) * 2;
-        double loopIterations = loop_iters * 500;
-        double opsPerIteration = totalOps * loopIterations;
-
-        double opsPerSec = opsPerIteration / elapsedTime;
-        double gops = opsPerIteration / ( elapsedTime * 1e9 );
-
-        std::cout << "Measuring throughput for " << "Instruction\n";
-        std::cout << "Total time (s):   " << elapsedTime << "\n";
-        std::cout << "Instructions per Second:   " << opsPerSec << "\n";
-        std::cout << "Estimated GFLOPS:   " << gops << " GFLOPS/sec\n";
-        std::cout << "-----------------------------------------------\n";
+        elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>( l_end_time - l_start_time ).count() / 1e6;
     }
     else if ( res_2 == 0 )
     {
@@ -117,20 +106,7 @@ void benchmark_thr( int64_t loop_iters,
                               16 );
         }
         auto l_end_time = std::chrono::high_resolution_clock::now();
-        double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>( l_end_time - l_start_time ).count() / 1e6;
-
-        double totalOps = ( 6 * 16 ) * 2;
-        double loopIterations = loop_iters * 500;
-        double opsPerIteration = totalOps * loopIterations;
-
-        double opsPerSec = opsPerIteration / elapsedTime;
-        double gops = opsPerIteration / ( elapsedTime * 1e9 );
-
-        std::cout << "Measuring throughput for " << "Instruction\n";
-        std::cout << "Total time (s):   " << elapsedTime << "\n";
-        std::cout << "Instructions per Second:   " << opsPerSec << "\n";
-        std::cout << "Estimated GFLOPS:   " << gops << " GFLOPS/sec\n";
-        std::cout << "-----------------------------------------------\n";
+        elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>( l_end_time - l_start_time ).count() / 1e6;
     }
     else if ( res_3 == 0 )
     {
@@ -156,21 +132,21 @@ void benchmark_thr( int64_t loop_iters,
                               16 );
         }
         auto l_end_time = std::chrono::high_resolution_clock::now();
-        double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>( l_end_time - l_start_time ).count() / 1e6;
-
-        double totalOps = ( 6 * 16 ) * 2;
-        double loopIterations = loop_iters * 500;
-        double opsPerIteration = totalOps * loopIterations;
-
-        double opsPerSec = opsPerIteration / elapsedTime;
-        double gops = opsPerIteration / ( elapsedTime * 1e9 );
-
-        std::cout << "Measuring throughput for " << "Instruction\n";
-        std::cout << "Total time (s):   " << elapsedTime << "\n";
-        std::cout << "Instructions per Second:   " << opsPerSec << "\n";
-        std::cout << "Estimated GFLOPS:   " << gops << " GFLOPS/sec\n";
-        std::cout << "-----------------------------------------------\n";
+        elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>( l_end_time - l_start_time ).count() / 1e6;
     }
+
+    double totalOps = ( 6 * 16 ) * 2;
+    double loopIterations = loop_iters * 500;
+    double opsPerIteration = totalOps * loopIterations;
+
+    double opsPerSec = opsPerIteration / elapsedTime;
+    double gflops = opsPerIteration / ( elapsedTime * 1e9 );
+
+    std::cout << "Measuring throughput for " << "Instruction\n";
+    std::cout << "Total time (s):   " << elapsedTime << "\n";
+    std::cout << "Instructions per Second:   " << opsPerSec << "\n";
+    std::cout << "Estimated GFLOPS:   " << gflops << " GFLOPS/sec\n";
+    std::cout << "-----------------------------------------------\n";
 }
 
 int main() 
