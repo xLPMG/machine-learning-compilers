@@ -101,8 +101,7 @@ void benchmark_thr( int64_t loop_iters,
 
     // (M x N x K) x (FMLA OPs)
     double totalOps = ( 64 * 64 * 64 ) * 2;
-    double loopIterations = loop_iters * 500;
-    double opsPerIteration = totalOps * loopIterations;
+    double opsPerIteration = totalOps * loop_iters;
 
     double opsPerSec = opsPerIteration / elapsedTime;
     double gflops = opsPerIteration / ( elapsedTime * 1e9 );
