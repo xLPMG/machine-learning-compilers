@@ -371,7 +371,7 @@ Benchmarking this kernel we obtained the following results:
 .. literalinclude:: ../../../src/submissions/03_neon/05_accumulator_block_shapes/benchmarking_results.txt
     :language: text
     :linenos:
-     :caption: Benchmarking results for matmul_64_64_64 approaches
+    :caption: Benchmarking results for matmul_64_64_64 approaches
 
 To optimize the performance of this kernel, we made some minor changes to the computations of the strides. We also removed loads and stores of callee-saved registers that were not needed.
 
