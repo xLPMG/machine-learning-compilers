@@ -1,0 +1,15 @@
+Benchmarking V1 Matmul throughput ...
+-----------------------------------------------
+Measuring throughput for Instruction
+Total time (s):   1.27442
+Instructions per Second:   1.23418e+11
+Estimated GFLOPS:   123.418 GFLOPS/sec
+-----------------------------------------------
+
+Benchmarking V2 Matmul throughput ...
+-----------------------------------------------
+Measuring throughput for Instruction
+Total time (s):   1.246
+Instructions per Second:   1.26233e+11
+Estimated GFLOPS:   126.233 GFLOPS/sec
+-----------------------------------------------
