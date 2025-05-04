@@ -1,6 +1,6 @@
     .text
-    .type matmul_64_64_64, %function
-    .global matmul_64_64_64
+    .type v2_matmul_64_64_64, %function
+    .global v2_matmul_64_64_64
     /*
     * Computes C+=AB for three matrices 
     * with the dimensions M=64, N=64, and K=64.
@@ -12,7 +12,7 @@
     * @param x4 leading dimension of B.
     * @param x5 leading dimension of C.
     */
-matmul_64_64_64:
+v2_matmul_64_64_64:
 // ------------------------------------------
 // START PCS
 // ------------------------------------------
@@ -25,8 +25,6 @@ matmul_64_64_64:
     stp x19, x20, [sp, #-16]!
     stp x21, x22, [sp, #-16]!
     stp x23, x24, [sp, #-16]!
-    stp x25, x26, [sp, #-16]!
-    stp x27, x28, [sp, #-16]!
 
     stp  d8,  d9, [sp, #-16]!
     stp d10, d11, [sp, #-16]!
@@ -37,14 +35,13 @@ matmul_64_64_64:
 // ------------------------------------------
 
     // multiply strides with float size
-    mov x6, #4
-    mul x3, x3, x6 // lda
-    mul x4, x4, x6 // ldb
-    mul x5, x5, x6 // ldc
+    // *4 = lsl #2
+    lsl x3, x3, #2 // lda
+    lsl x4, x4, #2 // ldb
+    lsl x5, x5, #2 // ldc
 
-    mov x6, #4
-    mul x22, x4, x6 // ldb * 4 columns
-    mul x23, x5, x6 // ldc * 4 columns
+    lsl x22, x4, #2 // ldb * 4 columns
+    lsl x23, x5, #2 // ldc * 4 columns
 
     // set base matrix pointers
     mov x20, x1 // B
@@ -167,8 +164,8 @@ _k_loop:
 
     // increase A and C pointers for next block
     // (jump 16 values)
-    add x7, x7, #16*4
-    add x9, x9, #16*4
+    add x7, x7, #64 // 16*4
+    add x9, x9, #64 // 16*4
 
     // decrement m loop counter
     sub x11, x11, #1
@@ -196,8 +193,6 @@ _k_loop:
     ldp d10, d11, [sp], #16
     ldp  d8,  d9, [sp], #16
 
-    ldp x27, x28, [sp], #16
-    ldp x25, x26, [sp], #16
     ldp x23, x24, [sp], #16
     ldp x21, x22, [sp], #16
     ldp x19, x20, [sp], #16
