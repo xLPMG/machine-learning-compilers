@@ -1,0 +1,18 @@
+##
+# @author Lucas Obitz, Luca-Philipp Grumbach
+# @section DESCRIPTION
+# Execute tests on GitHub Actions
+##
+name: Run Tests
+
+on: [push, pull_request]
+jobs:
+  run-tests:
+    name: Run Tests
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v1
+      - name: Run Tests
+        run: |
+            make run_tests
