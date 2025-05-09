@@ -3,6 +3,7 @@ build/
 _build/
 *.o
 *.d
+*.bin
 
 .vscode
 .DS_STORE
