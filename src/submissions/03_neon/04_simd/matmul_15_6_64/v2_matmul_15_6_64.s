@@ -82,7 +82,7 @@ v2_matmul_15_6_64:
     // sixth column
     add x8, x8, x5
     ldp q20, q21, [x8]
-    ldp q22, q23, [x8, #32]
+    ldp q22, q23, [x8, #32] // possible memory leak
     mov v23.s[3], wzr
 
 
@@ -99,7 +99,7 @@ v2_matmul_15_6_64:
 _k1_loop:
     // load column of A
     ldp q24, q25, [x7] // 4 + 4 values
-    ldp q26, q27, [x7, #32] // 4 + 4 values
+    ldp q26, q27, [x7, #32] // 4 + 4 values - possible memory leak
     mov v27.s[3], wzr
 
     // B: COLUMN 0
@@ -182,7 +182,10 @@ _k1_loop:
     // sixth column
     add x8, x8, x5
     stp q20, q21, [x8]
-    stp q22, q23, [x8, #32]
+    str q22, q23, [x8, #32]
+
+
+    
 
 // #################### START PCS ####################
     // restore callee-saved registers
