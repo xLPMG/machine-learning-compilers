@@ -64,7 +64,7 @@ v3_matmul_15_6_64:
     mov v19.s[3], wzr
     add x8, x8, x5
     // sixth column
-    ld1 {v20.4s-v23.4s}, [x8]
+    ld1 {v20.4s-v23.4s}, [x8] // possible memory leak
     mov v23.s[3], wzr
 
 
@@ -80,8 +80,7 @@ v3_matmul_15_6_64:
 
 _k1_loop:
     // load column of A
-    ldp q24, q25, [x7] // 4 + 4 values
-    ldp q26, q27, [x7, #32] // 4 + 4 values
+    ld1 {v24.4s-v27.4s}, [x7]
     mov v27.s[3], wzr
 
     // B: COLUMN 0

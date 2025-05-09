@@ -59,7 +59,7 @@ v4_matmul_14_6_64:
     ld1 {v16.4s-v19.4s}, [x8]
     add x8, x8, x5
     // sixth column
-    ld1 {v20.4s-v23.4s}, [x8]
+    ld1 {v20.4s-v23.4s}, [x8] // possible memory leak
 
     //  K loop counter
     mov x6, #64
@@ -72,8 +72,7 @@ v4_matmul_14_6_64:
 
 _k1_loop:
     // load column of A
-    ldp q24, q25, [x7] // 4 + 4 values
-    ldr q26, [x7, #32] // 4 values
+    ld1 {v24.4s-v27.4s}, [x7]
     ldr d27, [x7, #48] // 2 values
 
     // B: COLUMN 0
@@ -149,7 +148,8 @@ _k1_loop:
     st1 {v16.4s-v19.4s}, [x8]
     add x8, x8, x5
     // sixth column
-    st1 {v20.4s-v23.4s}, [x8]
+    st1 {v20.4s-v22.4s}, [x8]
+    str d23, [x8, #48]
 
 // #################### START PCS ####################
     // restore callee-saved registers
