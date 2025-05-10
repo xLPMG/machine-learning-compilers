@@ -65,7 +65,7 @@ extern "C" {
                                    64 * 64,
                                    48 * 64 );
         }
-        std::memset( c, 0, sizeof( c ) );
+        std::memset( c, 0, 64 * 48 * sizeof( float ) ); 
 
         auto l_start_time = std::chrono::high_resolution_clock::now();
         for ( int i = 0; i < n; i++ )
@@ -99,7 +99,7 @@ extern "C" {
                                    64 * 64,
                                    48 * 64 );
         }
-        std::memset( c, 0, sizeof( c ) );
+        std::memset( c, 0, 64 * 48 * sizeof( float ) ); 
 
         auto l_start_time = std::chrono::high_resolution_clock::now();
         for ( int i = 0; i < n; i++ )
@@ -153,7 +153,7 @@ int main()
     {
         B[j] = static_cast<float>( j );
     }
-    std::memset( C, 0, sizeof( C ) );
+    std::memset( C, 0, 64 * 48 * sizeof(float) ); 
 
     int64_t l_iter = 25000;
     std::string v1_matmul( "v1_matmul" );

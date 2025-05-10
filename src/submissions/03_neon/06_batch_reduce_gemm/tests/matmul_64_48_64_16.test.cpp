@@ -26,17 +26,6 @@ extern "C"
                                 int64_t br_stride_b );
 }
 
-// void print_matrix(const float* mat, int rows, int cols, const std::string& name) {
-//     std::cout << "Matrix " << name << " (" << rows << "x" << cols << "):\n";
-//     for (int r = 0; r < rows; ++r) {
-//         for (int c = 0; c < cols; ++c) {
-//             std::cout << std::setw(8) << std::setprecision(4) << mat[r + c * rows] << " ";
-//         }
-//         std::cout << "\n";
-//     }
-//     std::cout << std::endl;
-// }
-
 TEST_CASE("Tests the v1_matmul_64_48_64_16 microkernel function with random matrices", "[v1_matmul_64_48_64_16]")
 {
     const int M = 64;
@@ -91,9 +80,6 @@ TEST_CASE("Tests the v1_matmul_64_48_64_16 microkernel function with random matr
     }
 
     v1_matmul_64_48_64_16(A, B, C, M, K, M, br_stride_a, br_stride_b);
-
-    // print_matrix(C, M, N, "C after all batches");
-    // print_matrix(C_expected, M, N, "C_expected");
 
     for (int i = 0; i < M * N; i++)
     {
@@ -155,9 +141,6 @@ TEST_CASE("Tests the v2_matmul_64_48_64_16 microkernel function with random matr
     }
 
     v2_matmul_64_48_64_16(A, B, C, M, K, M, br_stride_a, br_stride_b);
-
-    // print_matrix(C, M, N, "C after all batches");
-    // print_matrix(C_expected, M, N, "C_expected");
 
     for (int i = 0; i < M * N; i++)
     {
