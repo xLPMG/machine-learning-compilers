@@ -4,7 +4,7 @@
 #include <bitset>
 #include <cassert>
 
-std::string mini_jit::InstGen::to_string_hex(uint32_t inst)
+std::string InstGen::to_string_hex(uint32_t inst)
 {
   std::stringstream l_ss;
   l_ss << "0x" << std::hex
@@ -15,7 +15,7 @@ std::string mini_jit::InstGen::to_string_hex(uint32_t inst)
   return l_ss.str();
 }
 
-std::string mini_jit::InstGen::to_string_bin(uint32_t inst)
+std::string InstGen::to_string_bin(uint32_t inst)
 {
   std::string l_res = "0b";
   l_res += std::bitset<32>(inst).to_string();
@@ -23,12 +23,12 @@ std::string mini_jit::InstGen::to_string_bin(uint32_t inst)
   return l_res;
 }
 
-uint32_t mini_jit::InstGen::ret()
+uint32_t InstGen::ret()
 {
   return 0xd65f03c0;
 }
 
-uint32_t mini_jit::InstGen::base_br_cbnz(gpr_t reg,
+uint32_t InstGen::base_br_cbnz(gpr_t reg,
                                          int32_t imm19)
 {
   uint32_t l_ins = 0;
@@ -42,7 +42,7 @@ uint32_t mini_jit::InstGen::base_br_cbnz(gpr_t reg,
   return l_ins;
 }
 
-uint32_t mini_jit::InstGen::base_orr_shifted_reg(gpr_t reg_dest,
+uint32_t InstGen::base_orr_shifted_reg(gpr_t reg_dest,
                                                  gpr_t reg_src1,
                                                  gpr_t reg_src2,
                                                  uint32_t shift,
@@ -77,7 +77,7 @@ uint32_t mini_jit::InstGen::base_orr_shifted_reg(gpr_t reg_dest,
   return l_ins;
 }
 
-uint32_t mini_jit::InstGen::mov_reg(gpr_t reg_dest,
+uint32_t InstGen::mov_reg(gpr_t reg_dest,
                                     gpr_t reg_src)
 {
 
@@ -88,7 +88,7 @@ uint32_t mini_jit::InstGen::mov_reg(gpr_t reg_dest,
                               0x0);
 }
 
-uint32_t mini_jit::InstGen::movz(gpr_t reg_dest,
+uint32_t InstGen::movz(gpr_t reg_dest,
                                  uint16_t imm16,
                                  uint32_t shift)
 {
@@ -113,7 +113,7 @@ uint32_t mini_jit::InstGen::movz(gpr_t reg_dest,
   return l_ins;
 }
 
-uint32_t mini_jit::InstGen::mov_imm(gpr_t reg_dest, uint64_t imm)
+uint32_t InstGen::mov_imm(gpr_t reg_dest, uint64_t imm)
 {
   bool is64bit = (reg_dest & 0x20) != 0;
 
@@ -138,7 +138,7 @@ uint32_t mini_jit::InstGen::mov_imm(gpr_t reg_dest, uint64_t imm)
   return 0;
 }
 
-uint32_t mini_jit::InstGen::base_ldr_imm_uoff(gpr_t reg_dest,
+uint32_t InstGen::base_ldr_imm_uoff(gpr_t reg_dest,
                                               gpr_t reg_src,
                                               uint32_t imm)
 {
@@ -172,7 +172,7 @@ uint32_t mini_jit::InstGen::base_ldr_imm_uoff(gpr_t reg_dest,
   return l_ins;
 }
 
-uint32_t mini_jit::InstGen::base_ldp_soff(gpr_t reg_dest1,
+uint32_t InstGen::base_ldp_soff(gpr_t reg_dest1,
                                           gpr_t reg_dest2,
                                           gpr_t reg_src,
                                           int32_t imm7)
@@ -209,7 +209,7 @@ uint32_t mini_jit::InstGen::base_ldp_soff(gpr_t reg_dest1,
                   l_encoding);
 }
 
-uint32_t mini_jit::InstGen::base_ldp_post(gpr_t reg_dest1,
+uint32_t InstGen::base_ldp_post(gpr_t reg_dest1,
                                           gpr_t reg_dest2,
                                           gpr_t reg_src,
                                           int32_t imm7)
@@ -246,7 +246,7 @@ uint32_t mini_jit::InstGen::base_ldp_post(gpr_t reg_dest1,
                   l_encoding);
 }
 
-uint32_t mini_jit::InstGen::base_ldp_pre(gpr_t reg_dest1,
+uint32_t InstGen::base_ldp_pre(gpr_t reg_dest1,
                                          gpr_t reg_dest2,
                                          gpr_t reg_src,
                                          int32_t imm7)
@@ -283,7 +283,7 @@ uint32_t mini_jit::InstGen::base_ldp_pre(gpr_t reg_dest1,
                   l_encoding);
 }
 
-uint32_t mini_jit::InstGen::neon_ldr_imm_uoff(simd_fp_t reg_dest,
+uint32_t InstGen::neon_ldr_imm_uoff(simd_fp_t reg_dest,
                                               gpr_t reg_src,
                                               uint32_t imm12,
                                               neon_size_spec_t size_spec)
@@ -327,7 +327,7 @@ uint32_t mini_jit::InstGen::neon_ldr_imm_uoff(simd_fp_t reg_dest,
   return l_ins;
 }
 
-uint32_t mini_jit::InstGen::neon_ldp_soff(simd_fp_t reg_dest1,
+uint32_t InstGen::neon_ldp_soff(simd_fp_t reg_dest1,
                                           simd_fp_t reg_dest2,
                                           gpr_t reg_src,
                                           int32_t imm7,
@@ -360,7 +360,7 @@ uint32_t mini_jit::InstGen::neon_ldp_soff(simd_fp_t reg_dest1,
                   l_encoding);
 }
 
-uint32_t mini_jit::InstGen::neon_ldp_post(simd_fp_t reg_dest1,
+uint32_t InstGen::neon_ldp_post(simd_fp_t reg_dest1,
                                           simd_fp_t reg_dest2,
                                           gpr_t reg_src,
                                           int32_t imm7,
@@ -393,7 +393,7 @@ uint32_t mini_jit::InstGen::neon_ldp_post(simd_fp_t reg_dest1,
                   l_encoding);
 }
 
-uint32_t mini_jit::InstGen::neon_ldp_pre(simd_fp_t reg_dest1,
+uint32_t InstGen::neon_ldp_pre(simd_fp_t reg_dest1,
                                          simd_fp_t reg_dest2,
                                          gpr_t reg_src,
                                          int32_t imm7,
@@ -426,7 +426,7 @@ uint32_t mini_jit::InstGen::neon_ldp_pre(simd_fp_t reg_dest1,
                   l_encoding);
 }
 
-uint32_t mini_jit::InstGen::neon_dp_fmla_vector(simd_fp_t reg_dest,
+uint32_t InstGen::neon_dp_fmla_vector(simd_fp_t reg_dest,
                                                 simd_fp_t reg_src1,
                                                 simd_fp_t reg_src2,
                                                 arr_spec_t arr_spec)
@@ -452,7 +452,7 @@ uint32_t mini_jit::InstGen::neon_dp_fmla_vector(simd_fp_t reg_dest,
   return l_ins;
 }
 
-uint32_t mini_jit::InstGen::neon_vec_dp_fmla_by_element( simd_fp_t reg_dest,
+uint32_t InstGen::neon_vec_dp_fmla_by_element( simd_fp_t reg_dest,
                                                          simd_fp_t reg_src1,
                                                          simd_fp_t reg_src2,
                                                          arr_spec_t arr_spec )
@@ -479,7 +479,7 @@ uint32_t mini_jit::InstGen::neon_vec_dp_fmla_by_element( simd_fp_t reg_dest,
   return l_ins;
 }
 
-uint32_t mini_jit::InstGen::ldp_help(uint32_t reg_dest1,
+uint32_t InstGen::ldp_help(uint32_t reg_dest1,
   uint32_t reg_dest2,
   uint32_t reg_src,
   int32_t imm7,
@@ -514,7 +514,7 @@ uint32_t mini_jit::InstGen::ldp_help(uint32_t reg_dest1,
 /*
  * Store Base instructions
  */
-uint32_t mini_jit::InstGen::base_str_imm_uoff(gpr_t reg_dest,
+uint32_t InstGen::base_str_imm_uoff(gpr_t reg_dest,
                                               gpr_t reg_src,
                                               uint32_t imm)
 {
@@ -548,7 +548,7 @@ uint32_t mini_jit::InstGen::base_str_imm_uoff(gpr_t reg_dest,
   return l_ins;
 }
 
-uint32_t mini_jit::InstGen::base_stp_pre(gpr_t reg_dest1,
+uint32_t InstGen::base_stp_pre(gpr_t reg_dest1,
                                          gpr_t reg_dest2,
                                          gpr_t reg_src,
                                          int32_t imm7)
@@ -585,7 +585,7 @@ uint32_t mini_jit::InstGen::base_stp_pre(gpr_t reg_dest1,
                   l_encoding);
 }
 
-uint32_t mini_jit::InstGen::base_stp_post(gpr_t   reg_dest1,
+uint32_t InstGen::base_stp_post(gpr_t   reg_dest1,
                                           gpr_t   reg_dest2,
                                           gpr_t   reg_src,
                                           int32_t imm7 )
@@ -623,7 +623,7 @@ uint32_t mini_jit::InstGen::base_stp_post(gpr_t   reg_dest1,
                   l_encoding);
 }
 
-uint32_t mini_jit::InstGen::base_stp_soff(gpr_t reg_dest1,
+uint32_t InstGen::base_stp_soff(gpr_t reg_dest1,
                                           gpr_t reg_dest2,
                                           gpr_t reg_src,
                                           int32_t imm7)
@@ -663,7 +663,7 @@ uint32_t mini_jit::InstGen::base_stp_soff(gpr_t reg_dest1,
 /*
  * Store Neon instructions
  */
-uint32_t mini_jit::InstGen::neon_stp_post(simd_fp_t reg_dest1,
+uint32_t InstGen::neon_stp_post(simd_fp_t reg_dest1,
                                           simd_fp_t reg_dest2,
                                           gpr_t reg_src,
                                           int32_t imm7,
@@ -696,7 +696,7 @@ uint32_t mini_jit::InstGen::neon_stp_post(simd_fp_t reg_dest1,
                   l_encoding);
 }
 
-uint32_t mini_jit::InstGen::neon_stp_pre(simd_fp_t reg_dest1,
+uint32_t InstGen::neon_stp_pre(simd_fp_t reg_dest1,
                                          simd_fp_t reg_dest2,
                                          gpr_t reg_src,
                                          int32_t imm7,
@@ -729,7 +729,7 @@ uint32_t mini_jit::InstGen::neon_stp_pre(simd_fp_t reg_dest1,
                   l_encoding );
 }
 
-uint32_t mini_jit::InstGen::neon_stp_soff(simd_fp_t reg_dest1,
+uint32_t InstGen::neon_stp_soff(simd_fp_t reg_dest1,
                                           simd_fp_t reg_dest2,
                                           gpr_t reg_src,
                                           int32_t imm7,
@@ -762,7 +762,7 @@ uint32_t mini_jit::InstGen::neon_stp_soff(simd_fp_t reg_dest1,
                   l_encoding);
 }
 
-uint32_t mini_jit::InstGen::stp_help(uint32_t reg_dest1,
+uint32_t InstGen::stp_help(uint32_t reg_dest1,
                                      uint32_t reg_dest2,
                                      uint32_t reg_src,
                                      int32_t imm7,
@@ -794,7 +794,7 @@ uint32_t mini_jit::InstGen::stp_help(uint32_t reg_dest1,
   return l_ins;
 }
 
-uint32_t mini_jit::InstGen::ldr_help(uint32_t reg_dest,
+uint32_t InstGen::ldr_help(uint32_t reg_dest,
                                      uint32_t reg_src,
                                      int32_t imm12,
                                      uint32_t opc,
@@ -827,7 +827,7 @@ uint32_t mini_jit::InstGen::ldr_help(uint32_t reg_dest,
 /*
  * Math instructions
  */
-uint32_t mini_jit::InstGen::mul_reg( gpr_t reg_dest,
+uint32_t InstGen::mul_reg( gpr_t reg_dest,
   gpr_t reg_src1,
   gpr_t reg_src2 )
 {
@@ -864,7 +864,7 @@ l_ins |= l_sf << 26; // set bit 31
   return l_ins;
 }
 
-uint32_t mini_jit::InstGen::add_shifted_reg(gpr_t reg_dest,
+uint32_t InstGen::add_shifted_reg(gpr_t reg_dest,
                                             gpr_t reg_src1,
                                             gpr_t reg_src2,
                                             uint32_t imm6,
@@ -911,7 +911,7 @@ uint32_t mini_jit::InstGen::add_shifted_reg(gpr_t reg_dest,
   return l_ins;
 }
 
-uint32_t mini_jit::InstGen::mov_sp(gpr_t reg_dest,
+uint32_t InstGen::mov_sp(gpr_t reg_dest,
                                     gpr_t reg_src)
 {
     return add_immediate(reg_dest,
@@ -920,7 +920,7 @@ uint32_t mini_jit::InstGen::mov_sp(gpr_t reg_dest,
                          0);
 }
 
-uint32_t mini_jit::InstGen::add_immediate(gpr_t reg_dest,
+uint32_t InstGen::add_immediate(gpr_t reg_dest,
                                           gpr_t reg_src,
                                           uint32_t imm12,
                                           uint32_t shift)
@@ -950,7 +950,7 @@ uint32_t mini_jit::InstGen::add_immediate(gpr_t reg_dest,
   return l_ins;
 }
 
-uint32_t mini_jit::InstGen::sub_immediate( gpr_t reg_dest,
+uint32_t InstGen::sub_immediate( gpr_t reg_dest,
                                            gpr_t reg_src,
                                            uint32_t imm12,
                                            uint32_t shift )

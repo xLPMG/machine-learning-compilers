@@ -9,7 +9,7 @@ namespace mini_jit
   class InstGen;
 }
 
-class mini_jit::InstGen
+class InstGen
 {
 public:
   //! general-purpose registers
