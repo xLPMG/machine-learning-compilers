@@ -11,7 +11,7 @@ namespace mini_jit
          * @brief Kernel for batch-reduce matrix multiplication.
          * @param kernel Kernel object to be filled with instructions.
          */
-        void matmul_16_6_k( mini_jit::Kernel &kernel );      
+        void matmul_16_6_k( mini_jit::Kernel &kernel, int k );      
     }
 };
 

@@ -17,7 +17,7 @@ namespace inst = mini_jit::instructions;
 namespace base = inst::base;
 namespace simd_fp = inst::simd_fp;
 
-void mini_jit::kernels::matmul_16_6_k( mini_jit::Kernel &kernel )
+void mini_jit::kernels::matmul_16_6_k( mini_jit::Kernel &kernel, int k )
 {
     // PCS
     kernel.add_instr( base::stpPre(gpr_t::x29, gpr_t::x30, gpr_t::sp, -16) );
@@ -67,10 +67,10 @@ void mini_jit::kernels::matmul_16_6_k( mini_jit::Kernel &kernel )
     kernel.add_instr( simd_fp::ldp(simd_fp_t::v22, simd_fp_t::v23, gpr_t::x8, 32, neon_size_spec_t::q) );
 
     // Setup for Loop
-    kernel.add_instr( base::mov(gpr_t::x6, 2) );
-    kernel.add_instr( base::mov(gpr_t::x7, gpr_t::x0) );
-    kernel.add_instr( base::mov(gpr_t::x8, gpr_t::x1) );
-    kernel.add_instr( base::mov(gpr_t::x9, 0) );
+    kernel.add_instr( base::mov(gpr_t::x6, k) ); // K loop counter
+    kernel.add_instr( base::mov(gpr_t::x7, gpr_t::x0) ); // Matrix A pointer
+    kernel.add_instr( base::mov(gpr_t::x8, gpr_t::x1) ); // Matrix B pointer
+    kernel.add_instr( base::mov(gpr_t::x9, 0) ); // Row index for Matrix B
 
     // START K_LOOP
 
@@ -138,7 +138,9 @@ void mini_jit::kernels::matmul_16_6_k( mini_jit::Kernel &kernel )
     kernel.add_instr( simd_fp::fmlaElem(simd_fp_t::v23, simd_fp_t::v27, simd_fp_t::v29, arr_spec_t::s4) );
 
     // Decrement K
-    kernel.add_instr( base::add(gpr_t::x7, gpr_t::x7, gpr_t::x3, 0, 0) );
+    // move to next column of A
+    kernel.add_instr( base::add(gpr_t::x7, gpr_t::x7, gpr_t::x3, 0, 0) ); 
+    // move to next row of B
     kernel.add_instr( base::mov(gpr_t::x8, gpr_t::x1) );
     kernel.add_instr( base::add(gpr_t::x9, gpr_t::x9, 4, 0) );
     kernel.add_instr( base::add(gpr_t::x8, gpr_t::x8, gpr_t::x9, 0, 0) );
