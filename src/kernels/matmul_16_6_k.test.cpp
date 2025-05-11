@@ -1,5 +1,6 @@
 #include <catch2/catch.hpp>
 #include <random>
+#include <vector>
 #include <iostream>
 
 #include "matmul_16_6_k.h"
@@ -21,10 +22,10 @@ TEST_CASE("Tests the matmul_16_6_k microkernel function with random matrices", "
     {
         int K = k_dist(gen);
 
-        float A[M * K];
-        float B[K * N];
-        float C[M * N];
-        float C_expected[M * N];
+        std::vector<float> A(M * K);
+        std::vector<float> B(K * N);
+        std::vector<float> C(M * N);
+        std::vector<float> C_expected(M * N);
 
         // Initialize matrices A and B with random values
         for (int i = 0; i < M * K; i++)
@@ -61,7 +62,7 @@ TEST_CASE("Tests the matmul_16_6_k microkernel function with random matrices", "
         REQUIRE(l_ret == mini_jit::Brgemm::error_t::success);
 
         mini_jit::Brgemm::kernel_t l_kernel = l_brgemm.get_kernel();
-        l_kernel(A, B, C, M, K, M, 0, 0);
+        l_kernel(A.data(), B.data(), C.data(), M, K, M, 0, 0);
 
         for (int i = 0; i < M * N; i++)
         {

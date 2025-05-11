@@ -65,7 +65,7 @@ mini_jit::Brgemm::error_t mini_jit::Brgemm::generate( uint32_t m,
         }
         else
         {
-            mini_jit::kernels::matmul_16_6_k( m_kernel );
+            mini_jit::kernels::matmul_16_6_k( m_kernel, k );
         }
 
         // Valid matrix kernel
