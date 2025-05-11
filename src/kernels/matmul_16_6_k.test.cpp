@@ -16,12 +16,9 @@ TEST_CASE("Tests the matmul_16_6_k microkernel function with random matrices", "
     std::uniform_int_distribution<int> k_dist(1, 100); // Random K values between 1 and 100
     std::uniform_real_distribution<float> dist(-10.0f, 10.0f);
 
-    mini_jit::Brgemm l_brgemm;
-
     for (int test = 0; test < 10; ++test) // Run the test 10 times with different K values
     {
         int K = k_dist(gen);
-
         std::vector<float> A(M * K);
         std::vector<float> B(K * N);
         std::vector<float> C(M * N);
@@ -58,6 +55,7 @@ TEST_CASE("Tests the matmul_16_6_k microkernel function with random matrices", "
             }
         }
 
+        mini_jit::Brgemm l_brgemm;
         mini_jit::Brgemm::error_t l_ret = l_brgemm.generate(16, 6, K, 4, 0, 0, 0, mini_jit::Brgemm::dtype_t::fp32);
         REQUIRE(l_ret == mini_jit::Brgemm::error_t::success);
 
