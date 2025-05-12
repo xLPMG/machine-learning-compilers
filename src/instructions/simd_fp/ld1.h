@@ -148,7 +148,7 @@ namespace mini_jit
             }
 
             /**!
-             * @brief Generates an LD1 instruction (single structure) with a lane index and a post-index immediate, e.g. LD1 {V0.S}[0], [X0] #4
+             * @brief Generates an LD1 instruction (single structure) with a lane index and a post-index immediate, e.g. LD1 {V0.S}[0], [X0], #4
              * @param reg_dst Destination SIMD register.
              * @param reg_src Source general-purpose register containing the address.
              * @param index Index of the lane to load to.
