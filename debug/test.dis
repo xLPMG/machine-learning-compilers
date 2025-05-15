@@ -10,6 +10,5 @@ SYMBOL TABLE:
 Disassembly of section .text:
 
 0000000000000000 <test_asm>:
-   0:	4ddf9000 	ld1	{v0.s}[3], [x0], #4
-   4:	4ddf8400 	ld1	{v0.d}[1], [x0], #8
-   8:	d65f03c0 	ret
+   0:	d37ef463 	lsl	x3, x3, #2
+   4:	d65f03c0 	ret

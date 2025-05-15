@@ -1,7 +1,7 @@
 #include "Brgemm.h"
 #include "Kernel.h"
-#include "kernels/matmul_16_6_1.h"
-#include "kernels/matmul_16_6_k.h"
+#include "kernels/matmul/matmul_m_n_k.h"
+#include "kernels/matmul/matmul_br_m_n_k.h"
 #include <iostream>
 
 /**
@@ -19,32 +19,49 @@ mini_jit::Brgemm::error_t mini_jit::Brgemm::generate( uint32_t m,
 {
     /**
      * Currently supported:
-     * M = 16
-     * N =  6
-     * K =  1
      * BR_SIZE: Not defined
      * trans_a, trans_b, trans_c: Column-major
      * dtype: fp32
      */
 
-    if( m != 16 )
+    if( m <= 0 )
     {
-        std::cout << ( "M must be 16" ) << std::endl;
+        std::cout << ( "M must be greater than 0" ) << std::endl;
         return mini_jit::Brgemm::error_t::wrong_m_dimension;
     }
-    else if ( n != 6 )
+    else if ( m >= 1025 )
     {
-        std::cout << ( "N must be 6" ) << std::endl;
+        std::cout << ( "M must not greater than 1024" ) << std::endl;
+        return mini_jit::Brgemm::error_t::wrong_m_dimension;
+    }
+    else if ( n <= 0 )
+    {
+        std::cout << ( "N must be greater than" ) << std::endl;
         return mini_jit::Brgemm::error_t::wrong_n_dimension;
     }
-    else if ( k == 0 )
+    else if ( n >= 1025 )
     {
-        std::cout << ( "K must not be 0" ) << std::endl;
+        std::cout << ( "N must not be greater than 1024" ) << std::endl;
+        return mini_jit::Brgemm::error_t::wrong_n_dimension;
+    }
+    else if ( k <= 0 )
+    {
+        std::cout << ( "K must be greater than 0" ) << std::endl;
         return mini_jit::Brgemm::error_t::wrong_k_dimension;
     }
-    else if ( br_size != 4 ) // for now, we don't check br_size
+    else if ( k >= 2049 )
     {
-        std::cout << ( "BR_SIZE must be 4" ) << std::endl;
+        std::cout << ( "K must not be greater than 2048" ) << std::endl;
+        return mini_jit::Brgemm::error_t::wrong_k_dimension;
+    }
+    else if ( br_size <= 0 )
+    {
+        std::cout << ( "BR_SIZE must greater than 0" ) << std::endl;
+        return mini_jit::Brgemm::error_t::wrong_batch_reduce_size;
+    }
+    else if ( br_size >= 1025)
+    {
+        std::cout << ( "BR_SIZE must not be greater than 1024" ) << std::endl;
         return mini_jit::Brgemm::error_t::wrong_batch_reduce_size;
     }
     else if ( trans_a != 0 || trans_b != 0 || trans_c != 0 )
@@ -59,13 +76,13 @@ mini_jit::Brgemm::error_t mini_jit::Brgemm::generate( uint32_t m,
     }
     else
     {
-        if ( k == 1 )
+        if (br_size == 1)
         {
-            mini_jit::kernels::matmul_16_6_1( m_kernel );
+            mini_jit::kernels::matmul::matmul_m_n_k(m_kernel, m, n, k);
         }
         else
         {
-            mini_jit::kernels::matmul_16_6_k( m_kernel, k );
+            mini_jit::kernels::matmul::matmul_br_m_n_k(m_kernel, m, n, k, br_size);
         }
 
         // Valid matrix kernel

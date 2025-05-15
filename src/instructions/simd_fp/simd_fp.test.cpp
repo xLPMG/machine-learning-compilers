@@ -20,6 +20,22 @@ TEST_CASE("Tests the Neon LDR instruction generation", "[Neon LDR]")
     uint32_t l_ins = simd_fp::ldr(simd_fp_t::v28, gpr_t::x6, 0, neon_size_spec_t::s);
     std::string l_hex = to_string_hex(l_ins);
     REQUIRE(l_hex == "0xbd4000dc");
+
+    l_ins = simd_fp::ldrPost(simd_fp_t::v28, gpr_t::x6, 16, neon_size_spec_t::s);
+    l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0xbc4104dc");
+
+    l_ins = simd_fp::ldrPost(simd_fp_t::v12, gpr_t::x9, 24, neon_size_spec_t::d);
+    l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0xfc41852c");
+
+    l_ins = simd_fp::ldrPost(simd_fp_t::v0, gpr_t::x20, 8, neon_size_spec_t::d);
+    l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0xfc408680");
+
+    l_ins = simd_fp::ldrPost(simd_fp_t::v7, gpr_t::x11, 32, neon_size_spec_t::q);
+    l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0x3cc20567");
 }
 
 TEST_CASE("Tests the Neon LDP instruction generation", "[Neon LDP]")
@@ -35,6 +51,29 @@ TEST_CASE("Tests the Neon LDP instruction generation", "[Neon LDP]")
     l_ins = simd_fp::ldpPre(simd_fp_t::v1, simd_fp_t::v2, gpr_t::x0, 16, neon_size_spec_t::d);
     l_hex = to_string_hex(l_ins);
     REQUIRE(l_hex == "0x6dc10801");
+}
+
+TEST_CASE("Tests the Neon STR instruction generation", "[Neon STR]")
+{
+    uint32_t l_ins = simd_fp::str(simd_fp_t::v0, gpr_t::x12, 0, neon_size_spec_t::s);
+    std::string l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0xbd000180");
+
+    l_ins = simd_fp::strPost(simd_fp_t::v28, gpr_t::x6, 16, neon_size_spec_t::s);
+    l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0xbc0104dc");
+
+    l_ins = simd_fp::strPost(simd_fp_t::v12, gpr_t::x9, 24, neon_size_spec_t::d);
+    l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0xfc01852c");
+
+    l_ins = simd_fp::strPost(simd_fp_t::v0, gpr_t::x20, 8, neon_size_spec_t::d);
+    l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0xfc008680");
+
+    l_ins = simd_fp::strPost(simd_fp_t::v7, gpr_t::x11, 32, neon_size_spec_t::q);
+    l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0x3c820567");
 }
 
 TEST_CASE("Tests the Neon STP instruction generation", "[Neon STP]")
@@ -92,4 +131,71 @@ TEST_CASE("Tests the Neon LD1 (single structure) with a lane index and a post-in
 
     CHECK_THROWS_AS(simd_fp::ld1(simd_fp_t::v0, gpr_t::x1, 1, neon_size_spec_t::d, 4), std::invalid_argument);
     CHECK_THROWS_AS(simd_fp::ld1(simd_fp_t::v0, gpr_t::x1, 1, neon_size_spec_t::s, 8), std::invalid_argument);
+}
+
+TEST_CASE("Tests the Neon ST1 (single structure) with a lane index instruction generation", "[Neon ST1 Single Structure Index]")
+{
+    uint32_t l_ins = simd_fp::st1(simd_fp_t::v0, gpr_t::x0, 3, neon_size_spec_t::s);
+    std::string l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0x4d009000");
+
+    l_ins = simd_fp::st1(simd_fp_t::v5, gpr_t::x1, 1, neon_size_spec_t::d);
+    l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0x4d008425");
+
+    CHECK_THROWS_AS(simd_fp::st1(simd_fp_t::v0, gpr_t::x0, 4, neon_size_spec_t::s), std::out_of_range);
+    CHECK_THROWS_AS(simd_fp::st1(simd_fp_t::v0, gpr_t::x0, 2, neon_size_spec_t::d), std::out_of_range);
+}
+
+TEST_CASE("Tests the Neon ST1 (single structure) with a lane index and a register post-index instruction generation", "[Neon ST1 Single Structure Index Post-Index Register]")
+{
+    uint32_t l_ins = simd_fp::st1(simd_fp_t::v0, gpr_t::x0, 3, neon_size_spec_t::s, gpr_t::x1);
+    std::string l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0x4d819000");
+}
+
+TEST_CASE("Tests the Neon ST1 (single structure) with a lane index and a post-index immediate instruction generation", "[Neon ST1 Single Structure Index Post-Index Immediate]")
+{
+    uint32_t l_ins = simd_fp::st1(simd_fp_t::v0, gpr_t::x0, 3, neon_size_spec_t::s, 4);
+    std::string l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0x4d9f9000");
+
+    l_ins = simd_fp::st1(simd_fp_t::v0, gpr_t::x0, 1, neon_size_spec_t::d, 8);
+    l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0x4d9f8400");
+
+    CHECK_THROWS_AS(simd_fp::st1(simd_fp_t::v0, gpr_t::x1, 1, neon_size_spec_t::d, 4), std::invalid_argument);
+    CHECK_THROWS_AS(simd_fp::st1(simd_fp_t::v0, gpr_t::x1, 1, neon_size_spec_t::s, 8), std::invalid_argument);
+}
+
+TEST_CASE("Tests the Neon MOV (from general-purpose register) instruction generation", "[Neon MOV GPR]")
+{
+    uint32_t l_ins = simd_fp::mov(simd_fp_t::v0, gpr_t::wzr, 3, neon_size_spec_t::s);
+    std::string l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0x4e1c1fe0");
+
+    l_ins = simd_fp::mov(simd_fp_t::v2, gpr_t::wzr, 3, neon_size_spec_t::s);
+    l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0x4e1c1fe2");
+
+    l_ins = simd_fp::mov(simd_fp_t::v0, gpr_t::w1, 3, neon_size_spec_t::s);
+    l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0x4e1c1c20");
+
+    l_ins = simd_fp::mov(simd_fp_t::v8, gpr_t::x2, 0, neon_size_spec_t::d);
+    l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0x4e081c48");
+
+    CHECK_THROWS_AS(simd_fp::mov(simd_fp_t::v0, gpr_t::wzr, 3, neon_size_spec_t::q), std::invalid_argument);
+}
+
+TEST_CASE("Tests the Neon FMADD instruction generation", "[Neon FMADD]")
+{
+    uint32_t l_ins = simd_fp::fmadd(simd_fp_t::v1, simd_fp_t::v25, simd_fp_t::v29, simd_fp_t::v1, neon_size_spec_t::s);
+    std::string l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0x1f1d0721");
+
+    l_ins = simd_fp::fmadd(simd_fp_t::v1, simd_fp_t::v25, simd_fp_t::v29, simd_fp_t::v1, neon_size_spec_t::d);
+    l_hex = to_string_hex(l_ins);
+    REQUIRE(l_hex == "0x1f5d0721");
 }
