@@ -1,4 +1,5 @@
 #include <random>
+#include <chrono>
 #include "Benchmark.h"
 #include "Matmul_m_n_k.bench.h"
 #include "Kernel.h"
