@@ -10,7 +10,7 @@ namespace mini_jit
         namespace unary
         {
             /**
-             * @brief Kernel for zeroing out a matrix using EOR.
+             * @brief Kernel for zeroing out a matrix using neon and EOR.
              * @param kernel Kernel object to be filled with instructions.
              * @param m number of rows in the matrix.
              * @param n number of columns in the matrix.
