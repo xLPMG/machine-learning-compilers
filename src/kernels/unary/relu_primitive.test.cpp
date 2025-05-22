@@ -23,8 +23,9 @@ void test_relu_primitive(uint32_t M,
 
     for (u_int32_t i = 0; i < M * N; i++)
     {
-        A[i] = dist(gen);
-        A_expected[i] = A[i];
+        float l_aValue = dist(gen);
+        A[i] = l_aValue;
+        A_expected[i] = l_aValue;
         B[i] = dist(gen);
         B_expected[i] = fRelu(A[i]);
     }

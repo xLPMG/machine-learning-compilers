@@ -1,9 +1,6 @@
 #include "Kernel.h"
 #include "Unary.h"
-#include "kernels/unary/zero_primitive.h"
-#include "kernels/unary/relu_primitive.h"
-#include "kernels/unary/identity_primitive.h"
-#include "kernels/unary/identity_trans_primitive.h"
+#include "kernels/unary/all_unary_primitives.h"
 #include <iostream>
 
 mini_jit::Unary::error_t mini_jit::Unary::generate( uint32_t m,
@@ -32,6 +29,11 @@ mini_jit::Unary::error_t mini_jit::Unary::generate( uint32_t m,
         std::cout << ( "N must not be greater than 2048" ) << std::endl;
         return mini_jit::Unary::error_t::wrong_n_dimension;
     }
+    else if (trans_b != 0 && trans_b != 1)
+    {
+        std::cout << ("Invalid trans_b parameter value") << std::endl;
+        return mini_jit::Unary::error_t::operation_not_supported;
+    }
 
     switch (ptype)
     {
@@ -47,21 +49,15 @@ mini_jit::Unary::error_t mini_jit::Unary::generate( uint32_t m,
         {
             mini_jit::kernels::unary::identity_trans(m_kernel, m, n);
         }
-        else
-        {
-            std::cout << ( "Invalid trans_b parameter value" ) << std::endl;
-            return mini_jit::Unary::error_t::operation_not_supported;
-        }
         break;
     case ptype_t::relu:
-        if(trans_b != 0)
-        {
-            std::cout << ( "ReLU kernel does not support transposition" ) << std::endl;
-            return mini_jit::Unary::error_t::operation_not_supported;
-        }
-        else
+        if (0 == trans_b)
         {
             mini_jit::kernels::unary::relu(m_kernel, m, n);
+        }
+        else if (1 == trans_b)
+        {
+            mini_jit::kernels::unary::relu_trans(m_kernel, m, n);
         }
         break;
     default:

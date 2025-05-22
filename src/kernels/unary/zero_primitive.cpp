@@ -44,7 +44,7 @@ void mini_jit::kernels::unary::zero(mini_jit::Kernel &kernel,
     // Set n loop counter
     kernel.add_instr(base::mov(gpr_t::x5, n));
 
-    // create zero register
+    // Create zero register
     kernel.add_instr(simd_fp::zero(simd_fp_t::v31, arr_spec_t::b16));
 
     // Start n loop (1 column)
