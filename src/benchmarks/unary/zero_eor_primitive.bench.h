@@ -1,5 +1,5 @@
-#ifndef RELU_TRANS_PRIMITIVE_BENCH_H
-#define RELU_TRANS_PRIMITIVE_BENCH_H
+#ifndef ZERO_EOR_PRIMITIVE_BENCH_H
+#define ZERO_EOR_PRIMITIVE_BENCH_H
 #include "benchmarks/Benchmark.h"
 #include <cstdint>
 
@@ -7,20 +7,20 @@ namespace mini_jit
 {
     namespace benchmarks
     {
-        class Relu_trans_primitive_bench : public Benchmark
+        class Zero_eor_primitive_bench : public Benchmark
         {
         public:
             /**
-             * @brief Constructor for the benchmark for the transposition ReLU primitive.
+             * @brief Constructor for the benchmark for the EOR Zero primitive.
              * @param runTime The time to run the benchmark in seconds.
              * @param m number of rows in A and B.
              * @param n number of columns in A and B.
              */
-            Relu_trans_primitive_bench(double runTime,
-                                       uint32_t m,
-                                       uint32_t n);
+            Zero_eor_primitive_bench(double runTime,
+                                     uint32_t m,
+                                     uint32_t n);
             //! Destructor
-            ~Relu_trans_primitive_bench() override = default;
+            ~Zero_eor_primitive_bench() override = default;
             //! Runs the benchmark.
             void run() override;
 
@@ -35,4 +35,4 @@ namespace mini_jit
     }
 }
 
-#endif // RELU_TRANS_PRIMITIVE_BENCH_H
+#endif // ZERO_EOR_PRIMITIVE_BENCH_H

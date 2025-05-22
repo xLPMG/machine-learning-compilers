@@ -1,21 +1,21 @@
 #include <random>
 #include <chrono>
-#include "zero_primitive.bench.h"
+#include "zero_xzr_primitive.bench.h"
 #include "benchmarks/Benchmark.h"
-#include "kernels/unary/zero_primitive.h"
+#include "kernels/unary/zero_primitive_xzr.h"
 #include "Kernel.h"
 #include "Unary.h"
 
-mini_jit::benchmarks::Zero_primitive_bench::Zero_primitive_bench(double runTime,
-                                                                 uint32_t m,
-                                                                 uint32_t n) : Benchmark()
+mini_jit::benchmarks::Zero_xzr_primitive_bench::Zero_xzr_primitive_bench(double runTime,
+                                                                         uint32_t m,
+                                                                         uint32_t n) : Benchmark()
 {
     m_M = m;
     m_N = n;
     m_runTime = runTime;
 }
 
-void mini_jit::benchmarks::Zero_primitive_bench::run()
+void mini_jit::benchmarks::Zero_xzr_primitive_bench::run()
 {
     m_A = new float[m_M * m_N];
     m_B = new float[m_M * m_N];
@@ -33,7 +33,7 @@ void mini_jit::benchmarks::Zero_primitive_bench::run()
 
     // Generate and get the kernel function
     mini_jit::Kernel l_kernel;
-    mini_jit::kernels::unary::zero(l_kernel, m_M, m_N, 0);
+    mini_jit::kernels::unary::zero_xzr(l_kernel, m_M, m_N, 0);
     mini_jit::Unary::kernel_t l_kernel_t = reinterpret_cast<mini_jit::Unary::kernel_t>(const_cast<void *>(l_kernel.get_kernel()));
 
     // RUN
@@ -52,8 +52,8 @@ void mini_jit::benchmarks::Zero_primitive_bench::run()
     // END RUN
 
     // Calculate metrics
-    long l_totalNumberElements = m_M * m_N * l_num_reps;
-    double l_totalDataProcessed = (sizeof(float) * 2 * l_totalNumberElements) / (1024.0 * 1024.0 * 1024.0); // * 2 ?
+    long l_totalNumberElements = m_M * m_N * l_num_reps * 2;
+    double l_totalDataProcessed = (sizeof(float) * l_totalNumberElements) / (1024.0 * 1024.0 * 1024.0);
     double l_gibps = l_totalDataProcessed / l_elapsed;
 
     // Store the results
