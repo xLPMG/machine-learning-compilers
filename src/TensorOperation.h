@@ -49,7 +49,8 @@ public:
     };
 
     /// error codes
-    enum class error_t : int32_t {
+    enum class error_t : int32_t
+    {
         success = 0,
         wrong_dimension = 1,
         wrong_ptype = 3,

@@ -54,21 +54,22 @@ void mini_jit::kernels::unary::relu(mini_jit::Kernel &kernel,
     if (mLoopIterations > 0)
     {
         kernel.add_label("m_8_loop");
+        kernel.add_instr({
         // load 8 elements from A
-        kernel.add_instr(simd_fp::ldp(simd_fp_t::v0, simd_fp_t::v1, gpr_t::x8, 0, neon_size_spec_t::q));
+        simd_fp::ldp(simd_fp_t::v0, simd_fp_t::v1, gpr_t::x8, 0, neon_size_spec_t::q),
         // compute f(x)=max(x,0)
-        kernel.add_instr(simd_fp::fmax(simd_fp_t::v0, simd_fp_t::v0, simd_fp_t::v31, arr_spec_t::s4));
-        kernel.add_instr(simd_fp::fmax(simd_fp_t::v1, simd_fp_t::v1, simd_fp_t::v31, arr_spec_t::s4));
+        simd_fp::fmax(simd_fp_t::v0, simd_fp_t::v0, simd_fp_t::v31, arr_spec_t::s4),
+        simd_fp::fmax(simd_fp_t::v1, simd_fp_t::v1, simd_fp_t::v31, arr_spec_t::s4),
         // store 8 elements to B
-        kernel.add_instr(simd_fp::stp(simd_fp_t::v0, simd_fp_t::v1, gpr_t::x9, 0, neon_size_spec_t::q));
+        simd_fp::stp(simd_fp_t::v0, simd_fp_t::v1, gpr_t::x9, 0, neon_size_spec_t::q),
         // jump by 8 rows
-        kernel.add_instr(base::add(gpr_t::x8, gpr_t::x8, 8*4, 0));
-        kernel.add_instr(base::add(gpr_t::x9, gpr_t::x9, 8*4, 0));
+        base::add(gpr_t::x8, gpr_t::x8, 8*4, 0),
+        base::add(gpr_t::x9, gpr_t::x9, 8*4, 0),
         // decrement m loop counter
-        kernel.add_instr(base::sub(gpr_t::x7, gpr_t::x7, 1, 0));
+        base::sub(gpr_t::x7, gpr_t::x7, 1, 0),
+        });
         // check if loop counter is zero
-        int l_mLoopInstrCount = kernel.getInstrCountFromLabel("m_8_loop");
-        kernel.add_instr(base::cbnz(gpr_t::x7, -l_mLoopInstrCount * 4));
+        kernel.add_instr(base::cbnz(gpr_t::x7, -kernel.getInstrCountFromLabel("m_8_loop") * 4));
     }
 
     if (mLoopRemainder > 0)

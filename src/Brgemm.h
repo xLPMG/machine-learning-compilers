@@ -4,35 +4,37 @@
 #include "Kernel.h"
 #include <cstdint>
 
-namespace mini_jit {
-    class Brgemm;
+namespace mini_jit
+{
+  class Brgemm;
 }
 
-class mini_jit::Brgemm {
+class mini_jit::Brgemm
+{
 
-  private:
-    /// kernel
-    Kernel m_kernel;
+private:
+  /// kernel
+  Kernel m_kernel;
 
-  public:
-    /// data type
-    enum class dtype_t : uint32_t 
-    {
-        fp32 = 0,
-        fp64 = 1
-    };
+public:
+  /// data type
+  enum class dtype_t : uint32_t
+  {
+    fp32 = 0,
+    fp64 = 1
+  };
 
-    /// error codes
-    enum class error_t : int32_t 
-    {
-        success = 0,
-        wrong_m_dimension = 1,
-        wrong_n_dimension = 2,
-        wrong_k_dimension = 3,
-        wrong_batch_reduce_size = 4, // ignore for now
-        wrong_matrix_ordering_format = 5, // Column-major or Row-major
-        wrong_matrix_datatype = 6,
-    };
+  /// error codes
+  enum class error_t : int32_t
+  {
+    success = 0,
+    wrong_m_dimension = 1,
+    wrong_n_dimension = 2,
+    wrong_k_dimension = 3,
+    wrong_batch_reduce_size = 4,      // ignore for now
+    wrong_matrix_ordering_format = 5, // Column-major or Row-major
+    wrong_matrix_datatype = 6,
+  };
 
   /**
    * @brief Generate a kernel for batch-reduce matrix multiplication.
@@ -46,15 +48,14 @@ class mini_jit::Brgemm {
    * @param dtype data type of the matrices.
    * @return error_t::success on success, another error_t value otherwise.
    **/
-  error_t generate( uint32_t m,
-                    uint32_t n,
-                    uint32_t k,
-                    uint32_t br_size,
-                    uint32_t trans_a,
-                    uint32_t trans_b,
-                    uint32_t trans_c,
-                    dtype_t  dtype );
-
+  error_t generate(uint32_t m,
+                   uint32_t n,
+                   uint32_t k,
+                   uint32_t br_size,
+                   uint32_t trans_a,
+                   uint32_t trans_b,
+                   uint32_t trans_c,
+                   dtype_t dtype);
 
   /*
    * Kernel type.
@@ -68,22 +69,20 @@ class mini_jit::Brgemm {
    * - br_stride_a: Stride (in elements, not bytes) between A matrices.
    * - br_stride_b: Stride (in elements, not bytes) between B matrices.
    */
-  using kernel_t = void (*)( void    const * a,
-                             void    const * b,
-                             void          * c,
-                             int64_t         ld_a,
-                             int64_t         ld_b,
-                             int64_t         ld_c,
-                             int64_t         br_stride_a,
-                             int64_t         br_stride_b );
+  using kernel_t = void (*)(void const *a,
+                            void const *b,
+                            void *c,
+                            int64_t ld_a,
+                            int64_t ld_b,
+                            int64_t ld_c,
+                            int64_t br_stride_a,
+                            int64_t br_stride_b);
 
   /**
    * @brief Get the generated kernel: C += sum_i(A_i * B_i).
    * @return pointer to the generated kernel.
    **/
   kernel_t get_kernel() const;
-
-
 };
 
 #endif
