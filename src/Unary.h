@@ -2,6 +2,7 @@
 #define MINI_JIT_UNARY_H
 
 #include "Kernel.h"
+#include "TensorOperation.h"
 #include <cstdint>
 
 namespace mini_jit {
@@ -14,27 +15,9 @@ class mini_jit::Unary {
     Kernel m_kernel;
 
   public:
-    /// data type
-    enum class dtype_t : uint32_t {
-      fp32 = 0,
-      fp64 = 1
-    };
-
-    /// primitive type
-    enum class ptype_t : uint32_t {
-      zero     = 0,
-      identity = 1,
-      relu     = 2     
-    };
-
-    /// error codes
-    enum class error_t : int32_t {
-      success = 0,
-      wrong_m_dimension = 1,
-      wrong_n_dimension = 2,
-      wrong_ptype = 3,
-      operation_not_supported = 4,
-    };
+    using dtype_t = mini_jit::TensorOperation::dtype_t;
+    using ptype_t = mini_jit::TensorOperation::ptype_t;
+    using error_t = mini_jit::TensorOperation::error_t;
 
     /**
      * @brief Generate a kernel for a unary primitive.

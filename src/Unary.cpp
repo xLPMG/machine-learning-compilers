@@ -12,27 +12,27 @@ mini_jit::Unary::error_t mini_jit::Unary::generate( uint32_t m,
     if( m <= 0 )
     {
         std::cout << ( "M must be greater than 0" ) << std::endl;
-        return mini_jit::Unary::error_t::wrong_m_dimension;
+        return error_t::wrong_dimension;
     }
     else if ( m > 2048 )
     {
         std::cout << ( "M must not be greater than 2048" ) << std::endl;
-        return mini_jit::Unary::error_t::wrong_m_dimension;
+        return error_t::wrong_dimension;
     }
     else if ( n <= 0 )
     {
         std::cout << ( "N must be greater than 0" ) << std::endl;
-        return mini_jit::Unary::error_t::wrong_n_dimension;
+        return error_t::wrong_dimension;
     }
     else if ( n > 2048 )
     {
         std::cout << ( "N must not be greater than 2048" ) << std::endl;
-        return mini_jit::Unary::error_t::wrong_n_dimension;
+        return error_t::wrong_dimension;
     }
     else if (trans_b != 0 && trans_b != 1)
     {
         std::cout << ("Invalid trans_b parameter value") << std::endl;
-        return mini_jit::Unary::error_t::operation_not_supported;
+        return error_t::operation_not_supported;
     }
 
     switch (ptype)
@@ -62,10 +62,10 @@ mini_jit::Unary::error_t mini_jit::Unary::generate( uint32_t m,
         break;
     default:
         std::cout << ( "Invalid primitive type" ) << std::endl;
-        return mini_jit::Unary::error_t::wrong_ptype;
+        return error_t::wrong_ptype;
     }
 
-    return mini_jit::Unary::error_t::success;
+    return error_t::success;
 }
 
 mini_jit::Unary::kernel_t mini_jit::Unary::get_kernel() const 
