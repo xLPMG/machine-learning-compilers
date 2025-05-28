@@ -1,0 +1,18 @@
+Running TensorOperationBench benchmark #1
+Total time (s):                  3.0052
+Total reps:                      398
+Total floating point operations: 213674622976
+Estimated GFLOPS/sec:            71.1017
+--------------------------------------------------
+Running TensorOperationBench benchmark #2
+Total time (s):                  3.0062
+Total reps:                      413
+Total floating point operations: 221727686656
+Estimated GFLOPS/sec:            73.7568
+--------------------------------------------------
+Running TensorOperationBench benchmark #3
+Total time (s):                  3.00738
+Total reps:                      400
+Total floating point operations: 214748364800
+Estimated GFLOPS/sec:            71.4071
+--------------------------------------------------

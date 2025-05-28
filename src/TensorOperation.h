@@ -3,6 +3,11 @@
 
 #include <cstdint>
 #include <span>
+#include <vector>
+
+#include "types.h"
+#include "Unary.h"
+#include "Brgemm.h"
 
 namespace mini_jit
 {
@@ -11,52 +16,115 @@ namespace mini_jit
 
 class mini_jit::TensorOperation
 {
+private:
+    /// used dtype
+    mini_jit::dtype_t m_dtype;
+
+    /// Brgemm object for main kernel
+    mini_jit::Brgemm m_brgemm_main;
+    /// Unary object for first touch kernel
+    mini_jit::Unary m_unary_first_touch;
+    /// Unary object for main kernel
+    mini_jit::Unary m_unary_main;
+    /// Unary object for last touch kernel
+    mini_jit::Unary m_unary_last_touch;
+
+    /// first touch kernel type
+    mini_jit::ptype_t m_kernel_first_touch_type;
+    /// first touch kernel
+    void (*m_kernel_first_touch)(void const *,
+                                 void *,
+                                 int64_t,
+                                 int64_t);
+    /// main kernel type
+    mini_jit::ptype_t m_kernel_main_type;
+    /// main unary kernel
+    void (*m_kernel_unary_main)(void const *,
+                                void *,
+                                int64_t,
+                                int64_t);
+
+    /// main brgemm kernel
+    void (*m_kernel_gemm_main)(void const *,
+                               void const *,
+                               void *,
+                               int64_t,
+                               int64_t,
+                               int64_t,
+                               int64_t,
+                               int64_t);
+
+    /// last touch kernel type
+    mini_jit::ptype_t m_kernel_last_touch_type;
+    /// last touch kernel
+    void (*m_kernel_last_touch)(void const *,
+                                void *,
+                                int64_t,
+                                int64_t);
+
+    /// dimension types of the loops (m, n, k)
+    std::vector<dim_t> m_dim_types;
+    /// execution types of the loops (seq, shared, prim)
+    std::vector<exec_t> m_exec_types;
+    /// sizes of the dimensions (loops)
+    std::vector<int64_t> m_loop_sizes;
+    /// strides of the first input tensor
+    std::vector<int64_t> m_strides_in0;
+    /// strides of the second input tensor
+    std::vector<int64_t> m_strides_in1;
+    /// strides of the output tensor
+    std::vector<int64_t> m_strides_out;
+    /// location of first primitive loop
+    int64_t m_id_first_primitive_loop;
+
+    /// save matrix dimensions
+    int64_t m_dim_s;
+    int64_t m_dim_q;
+    int64_t m_dim_u;
+    int64_t m_dim_r;
+    int64_t m_dim_p;
+    int64_t m_dim_t;
+
+    /**
+     * Executes the first touch kernel.
+     *
+     * @param ptr_out Pointer to the output tensor.
+     * @param ldOut   Leading dimension of the output tensor.
+     */
+    void execute_kernel_first_touch(char *ptr_out,
+                                    int64_t ldOut);
+
+    /**
+     * Executes the main kernel.
+     *
+     * @param ptr_in0      Pointer to the first input tensor.
+     * @param ptr_in1      Pointer to the second input tensor (use nullptr if unary).
+     * @param ptr_out      Pointer to the output tensor.
+     * @param ldA          Leading dimension of the first input tensor.
+     * @param ldB          Leading dimension of the second input tensor.
+     * @param ldC          Leading dimension of the output tensor.
+     * @param br_size_A    Batch reduce size of the first input tensor (for brgemm).
+     * @param br_size_B    Batch reduce of the second input tensor (for brgemm).
+     */
+    void execute_kernel_main(char const *ptr_in0,
+                             char const *ptr_in1,
+                             char *ptr_out,
+                             int64_t ldA,
+                             int64_t ldB,
+                             int64_t ldC,
+                             int64_t br_size_A,
+                             int64_t br_size_B);
+
+    /**
+     * Executes the last touch kernel.
+     *
+     * @param ptr_out Pointer to the output tensor.
+     * @param ldOut   Leading dimension of the output tensor.
+     */
+    void execute_kernel_last_touch(char *ptr_out,
+                                   int64_t ldOut);
+
 public:
-    /// execution type
-    enum class exec_t : uint32_t
-    {
-        seq = 0,
-        prim = 1,
-        shared = 2,
-    };
-
-    /// primitive type
-    enum class ptype_t : uint32_t
-    {
-        zero = 0,
-        identity = 1,
-        relu = 2,
-        gemm = 3,
-        brgemm = 4,
-        none = 99
-    };
-
-    /// dimension type
-    enum class dim_t : uint32_t
-    {
-        c = 0,
-        m = 1,
-        n = 2,
-        k = 3,
-        undefined = 99
-    };
-
-    /// data type
-    enum class dtype_t : uint32_t
-    {
-        fp32 = 0,
-        fp64 = 1
-    };
-
-    /// error codes
-    enum class error_t : int32_t
-    {
-        success = 0,
-        wrong_dimension = 1,
-        wrong_ptype = 3,
-        operation_not_supported = 4,
-    };
-
     /**
      * Setup for a binary tensor contraction or a unary tensor operation.
      *
@@ -72,16 +140,17 @@ public:
      * @param strides_out       Strides of the output tensor.
      * @return error_t::success on success, another error_t value otherwise.
      **/
-    error_t setup(dtype_t dtype,
-                  ptype_t prim_first_touch,
-                  ptype_t prim_main,
-                  ptype_t prim_last_touch,
-                  std::span<const dim_t> dim_types,
-                  std::span<const exec_t> exec_types,
-                  std::span<const int64_t> dim_sizes,
-                  std::span<const int64_t> strides_in0,
-                  std::span<const int64_t> strides_in1,
-                  std::span<const int64_t> strides_out);
+    error_t
+    setup(dtype_t dtype,
+          ptype_t prim_first_touch,
+          ptype_t prim_main,
+          ptype_t prim_last_touch,
+          std::span<const dim_t> dim_types,
+          std::span<const exec_t> exec_types,
+          std::span<const int64_t> dim_sizes,
+          std::span<const int64_t> strides_in0,
+          std::span<const int64_t> strides_in1,
+          std::span<const int64_t> strides_out);
 
     /**
      * Execute the tensor operation.
@@ -111,6 +180,11 @@ public:
                       char *ptr_out,
                       bool first_access,
                       bool last_access);
+
+    int dtype_size() const
+    {
+        return m_dtype == dtype_t::fp32 ? 4 : 8;
+    }
 };
 
 #endif
