@@ -18,17 +18,21 @@ CXXFLAGS += -g
 CXXFLAGS += -Wall
 CXXFLAGS += -Wextra
 CXXFLAGS += -Wpedantic
-#CXXFLAGS += -fsanitize=address
 
 # LINKER FLAGS
-#LDFLAGS = -fsanitize=address
+LDFLAGS = 
 
-# DIRECTORIES
-SRC_DIR = src
-BIN_DIR_ROOT = build
-LIB_DIR = 
-INC_DIR = include
-SUB_DIR = $(SRC_DIR)/submissions
+# SANITIZER FLAGS
+SAN_CXX_FLAGS  = -g
+SAN_CXX_FLAGS += -fsanitize=float-divide-by-zero
+SAN_CXX_FLAGS += -fsanitize=bounds
+SAN_CXX_FLAGS += -fsanitize=address
+SAN_CXX_FLAGS += -fsanitize=undefined
+SAN_CXX_FLAGS += -fno-omit-frame-pointer
+
+SAN_LD_FLAGS  = -g
+SAN_LD_FLAGS += -fsanitize=address
+SAN_LD_FLAGS += -fsanitize=undefined
 
 # TARGET OS
 ifeq ($(OS),Windows_NT)
@@ -47,6 +51,24 @@ else
 endif
 ARCH := $(shell uname -m)
 
+# Check which compiler is used on macos
+ifeq ($(OS),macOS)
+ifneq (,$(findstring Apple clang,$(shell $(CXX) --version)))
+$(warning Apple clang does not support OpenMP. Switching to LLVM)
+
+LLVM_LOCATION = $(shell brew --prefix llvm)
+CXX = $(LLVM_LOCATION)/bin/clang++
+LD = $(LLVM_LOCATION)/bin/clang++
+endif
+endif
+
+# DIRECTORIES
+SRC_DIR = src
+BIN_DIR_ROOT = build
+LIB_DIR = 
+INC_DIR = include
+SUB_DIR = $(SRC_DIR)/submissions
+
 # OS-SPECIFIC DIRECTORIES
 BIN_DIR := $(BIN_DIR_ROOT)/$(OS)
 ifeq ($(OS),windows)
@@ -60,6 +82,26 @@ ifeq ($(OS),windows)
 else ifeq ($(OS),macOS)
 	BIN_DIR := $(BIN_DIR)-$(ARCH)
 endif
+
+# Threads
+LDFLAGS += -lpthread
+ifneq ($(OS),macOS)
+	CXXFLAGS += -pthread
+endif
+
+# OPENMP
+ifeq ($(OS),macOS)
+	CXXFLAGS += -Xpreprocessor
+	LDFLAGS += -Xpreprocessor
+
+	LIBOMP_LOCATION = $(shell brew --prefix llvm)
+	CXXFLAGS += -I$(LIBOMP_LOCATION)/include
+	LDFLAGS += -L$(LIBOMP_LOCATION)/lib
+	LDFLAGS += -lomp
+endif
+
+CXXFLAGS += -fopenmp
+LDFLAGS += -fopenmp
 
 # INCLUDES
 # INCFLAGS = -I$(LIB_DIR)
@@ -151,6 +193,11 @@ tests: createdirs $(COMMON_OBJ) $(TESTS_OBJ) $(NOSUB_TEST_OBJ)
 
 benchmarks: createdirs $(COMMON_OBJ) $(BENCH_MAIN_OBJ) $(BENCH_OBJ)
 	$(LD) -o $(BIN_DIR)/benchmarks $(COMMON_OBJ) $(BENCH_MAIN_OBJ) $(BENCH_OBJ) $(LDFLAGS) $(LIBS)
+
+san: CXXFLAGS := $(SAN_CXX_FLAGS) $(CXXFLAGS)
+san: LDFLAGS := $(SAN_LD_FLAGS) $(LDFLAGS)
+san: createdirs $(COMMON_OBJ) $(TESTS_OBJ) $(NOSUB_TEST_OBJ)
+	$(LD) -o $(BIN_DIR)/tests_san $(COMMON_OBJ) $(TESTS_OBJ) $(NOSUB_TEST_OBJ) $(LDFLAGS) $(LIBS)
 
 .PHONY: clean
 
