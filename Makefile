@@ -11,6 +11,13 @@ CPP_VERSION = c++20
 # LIBS
 LIBS = 
 
+# DIRECTORIES
+SRC_DIR = src
+BIN_DIR_ROOT = build
+LIB_DIR = 
+INC_DIR = include
+SUB_DIR = $(SRC_DIR)/submissions
+
 # COMPILER FLAGS
 CXXFLAGS  = -std=$(CPP_VERSION)
 CXXFLAGS += -O2
@@ -61,13 +68,6 @@ CXX = $(LLVM_LOCATION)/bin/clang++
 LD = $(LLVM_LOCATION)/bin/clang++
 endif
 endif
-
-# DIRECTORIES
-SRC_DIR = src
-BIN_DIR_ROOT = build
-LIB_DIR = 
-INC_DIR = include
-SUB_DIR = $(SRC_DIR)/submissions
 
 # OS-SPECIFIC DIRECTORIES
 BIN_DIR := $(BIN_DIR_ROOT)/$(OS)
