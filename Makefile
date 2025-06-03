@@ -94,7 +94,7 @@ ifeq ($(OS),macOS)
 	CXXFLAGS += -Xpreprocessor
 	LDFLAGS += -Xpreprocessor
 
-	LIBOMP_LOCATION = $(shell brew --prefix llvm)
+	LIBOMP_LOCATION = $(shell brew --prefix libomp)
 	CXXFLAGS += -I$(LIBOMP_LOCATION)/include
 	LDFLAGS += -L$(LIBOMP_LOCATION)/lib
 	LDFLAGS += -lomp
