@@ -223,4 +223,3 @@ tests-san: unit-tests-san int-tests-san
 
 clean:
 	rm -rf $(BIN_DIR)
-	rm -rf *.bin

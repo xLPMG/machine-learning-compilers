@@ -1,5 +1,7 @@
 #include "Kernel.h"
+#include <sys/stat.h>
 #include <sys/mman.h>
+#include <unistd.h>
 #include <fstream>
 #include <stdexcept>
 #include <cerrno>
@@ -153,13 +155,31 @@ void mini_jit::Kernel::release_memory()
   m_kernel = nullptr;
 }
 
-void mini_jit::Kernel::write(char const *path) const
+void mini_jit::Kernel::write(char const *filename) const
 {
-  std::ofstream l_out(path,
+  // create build/kernels dir
+  const char *build_dir = "build/kernels";
+  struct stat st;
+  if (stat(build_dir, &st) != 0)
+  {
+    if (mkdir(build_dir, 0755) != 0)
+    {
+      throw std::runtime_error("Failed to create build/kernels directory");
+    }
+  }
+  else if (!S_ISDIR(st.st_mode))
+  {
+    throw std::runtime_error("\"build/kernels\" exists but is not a directory");
+  }
+
+  // edit file path
+  std::string filepath = std::string(build_dir) + "/" + std::string(filename);
+
+  std::ofstream l_out(filepath,
                       std::ios::out | std::ios::binary);
   if (!l_out)
   {
-    throw std::runtime_error("Failed to open file: " + std::string(path));
+    throw std::runtime_error("Failed to open file: " + filepath);
   }
 
   l_out.write(reinterpret_cast<char const *>(m_buffer.data()),

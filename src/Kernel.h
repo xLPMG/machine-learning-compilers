@@ -122,9 +122,9 @@ public:
     /**
      * Writes the code buffer to the given file.
      *
-     * @param path path to the file.
+     * @param filename name of the file to write to.
      **/
-    void write(char const *path) const;
+    void write(char const *filename) const;
 };
 
 #endif
