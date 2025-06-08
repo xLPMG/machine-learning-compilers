@@ -1,4 +1,5 @@
 #include "Optimizer.h"
+#include "IRConverter.h"
 #include <algorithm>
 #include <limits.h>
 
@@ -26,6 +27,36 @@ void mini_jit::ir::Optimizer::optimize(std::vector<mini_jit::ir::Dimension> &dim
                       thread_target);
 
     // TODO: Dimension Fusion, Reorder?
+}
+
+void mini_jit::ir::Optimizer::optimize(std::vector<mini_jit::dim_t> &dim_types,
+                                       std::vector<mini_jit::exec_t> &exec_types,
+                                       std::vector<int64_t> &dim_sizes,
+                                       std::vector<int64_t> &strides_in0,
+                                       std::vector<int64_t> &strides_in1,
+                                       std::vector<int64_t> &strides_out,
+                                       int64_t thread_target,
+                                       int64_t max_kernel_size)
+{
+    // Convert input vectors to a vector of Dimensions
+    std::vector<mini_jit::ir::Dimension> dimensions;
+    IRConverter::convertConfigToDimensions(dim_types,
+                                           exec_types,
+                                           dim_sizes,
+                                           strides_in0,
+                                           strides_in1,
+                                           strides_out,
+                                           dimensions);
+    // Optimize the dimensions
+    optimize(dimensions, thread_target, max_kernel_size);
+    // Convert the optimized dimensions back to the original format
+    IRConverter::convertDimensionsToConfig(dimensions,
+                                           dim_types,
+                                           exec_types,
+                                           dim_sizes,
+                                           strides_in0,
+                                           strides_in1,
+                                           strides_out);
 }
 
 void mini_jit::ir::Optimizer::identifyPrimitives(std::vector<mini_jit::ir::Dimension> &dimensions)
@@ -147,10 +178,10 @@ void mini_jit::ir::Optimizer::identifyPrimitives(std::vector<mini_jit::ir::Dimen
 void mini_jit::ir::Optimizer::splitDimensions(std::vector<mini_jit::ir::Dimension> &dimensions,
                                               int64_t max_kernel_size)
 {
-    // Primitive dimensions should be split if they are too large (> 1024)
+    // Primitive dimensions should be split if they are too large (> max_kernel_size)
     for (size_t i = 0; i < dimensions.size(); i++)
     {
-        if (dimensions[i].exec_type == exec_t::prim && dimensions[i].size > 1024)
+        if (dimensions[i].exec_type == exec_t::prim && dimensions[i].size > max_kernel_size)
         {
             int64_t l_size_seq = 0;
             int64_t l_size_prim = 0;
@@ -195,9 +226,16 @@ void mini_jit::ir::Optimizer::createSharedLoops(std::vector<mini_jit::ir::Dimens
 
     if (l_num_threads >= thread_target)
     {
+        // make sure that the shared loops are at the front
+        std::stable_partition(dimensions.begin(), dimensions.end(),
+                              [](const mini_jit::ir::Dimension &dim)
+                              {
+                                  return dim.exec_type == exec_t::shared;
+                              });
         // no need to create more shared loops
         return;
     }
+    
     // Creation of new shared loops:
     for (size_t i = 0; i < dimensions.size(); i++)
     {
