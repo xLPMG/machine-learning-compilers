@@ -1,5 +1,7 @@
 #include "TensorOperation.h"
 #include <algorithm>
+#include <ostream>
+#include <iostream>
 
 mini_jit::error_t mini_jit::TensorOperation::setup(dtype_t dtype,
                                                    ptype_t prim_first_touch,
@@ -32,17 +34,10 @@ mini_jit::error_t mini_jit::TensorOperation::setup(dtype_t dtype,
     {
         return error_t::wrong_exec_type;
     }
-
-    /////////////////////////////////////////////////////////////////////
-    // Assign member variables
-    /////////////////////////////////////////////////////////////////////
-    m_dim_types.assign(dim_types.begin(), dim_types.end());
-    m_exec_types.assign(exec_types.begin(), exec_types.end());
-    m_dim_sizes.assign(dim_sizes.begin(), dim_sizes.end());
-    m_strides_in0.assign(strides_in0.begin(), strides_in0.end());
-    m_strides_in1.assign(strides_in1.begin(), strides_in1.end());
-    m_strides_out.assign(strides_out.begin(), strides_out.end());
-    m_dtype = dtype;
+    else if (prim_main == ptype_t::identity && prim_count != 2)
+    {
+        return error_t::wrong_exec_type;
+    }
 
     /////////////////////////////////////////////////////////////////////
     // Check allowed data type
@@ -72,6 +67,17 @@ mini_jit::error_t mini_jit::TensorOperation::setup(dtype_t dtype,
         return error_t::wrong_ptype;
     }
 
+    /////////////////////////////////////////////////////////////////////
+    // Assign member variables
+    /////////////////////////////////////////////////////////////////////
+    m_dim_types.assign(dim_types.begin(), dim_types.end());
+    m_exec_types.assign(exec_types.begin(), exec_types.end());
+    m_dim_sizes.assign(dim_sizes.begin(), dim_sizes.end());
+    m_strides_in0.assign(strides_in0.begin(), strides_in0.end());
+    m_strides_in1.assign(strides_in1.begin(), strides_in1.end());
+    m_strides_out.assign(strides_out.begin(), strides_out.end());
+    m_dtype = dtype;
+
     m_dim_id_prim_M = -1;
     m_dim_id_prim_N = -1;
     m_dim_id_prim_K = -1;
@@ -82,34 +88,6 @@ mini_jit::error_t mini_jit::TensorOperation::setup(dtype_t dtype,
     m_dim_id_sha_M = -1;
     m_dim_id_sha_N = -1;
     m_num_parallel_loops = 0;
-
-    /////////////////////////////////////////////////////////////////////
-    // Read PRIM dimensions using dim types
-    /////////////////////////////////////////////////////////////////////
-    // convert to int so negative values are allowed
-    int l_dim_types_size = static_cast<int>(m_dim_types.size());
-    for (int i = l_dim_types_size - 1; i >= 0; i--)
-    {
-        if (m_exec_types[i] == exec_t::prim)
-        {
-            if (m_dim_id_prim_M == -1 && m_dim_types[i] == dim_t::m)
-            {
-                m_dim_id_prim_M = i;
-            }
-            else if (m_dim_id_prim_N == -1 && m_dim_types[i] == dim_t::n)
-            {
-                m_dim_id_prim_N = i;
-            }
-            else if (m_dim_id_prim_K == -1 && m_dim_types[i] == dim_t::k)
-            {
-                m_dim_id_prim_K = i;
-            }
-            else if (m_dim_id_prim_K != -1 && m_dim_id_prim_BR == -1 && m_dim_types[i] == dim_t::k)
-            {
-                m_dim_id_prim_BR = i;
-            }
-        }
-    }
 
     /////////////////////////////////////////////////////////////////////
     // Find first PRIM and SEQ dimensions in exec types
@@ -147,7 +125,35 @@ mini_jit::error_t mini_jit::TensorOperation::setup(dtype_t dtype,
     }
 
     /////////////////////////////////////////////////////////////////////
-    // Read SEQ dimensions using dim types
+    // Read PRIM dimensions using dim types (No Copy)
+    /////////////////////////////////////////////////////////////////////
+    // convert to int so negative values are allowed
+    int l_dim_types_size = static_cast<int>(m_dim_types.size());
+    for (int i = l_dim_types_size - 1; i >= 0; i--)
+    {
+        if (m_exec_types[i] == exec_t::prim)
+        {
+            if (m_dim_id_prim_M == -1 && m_dim_types[i] == dim_t::m)
+            {
+                m_dim_id_prim_M = i;
+            }
+            else if (m_dim_id_prim_N == -1 && m_dim_types[i] == dim_t::n)
+            {
+                m_dim_id_prim_N = i;
+            }
+            else if (m_dim_id_prim_K == -1 && m_dim_types[i] == dim_t::k)
+            {
+                m_dim_id_prim_K = i;
+            }
+            else if (m_dim_id_prim_K != -1 && m_dim_id_prim_BR == -1 && m_dim_types[i] == dim_t::k)
+            {
+                m_dim_id_prim_BR = i;
+            }
+        }
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    // Read SEQ and SHARED dimensions using dim types
     /////////////////////////////////////////////////////////////////////
     for (size_t i = 0; i < m_dim_types.size(); ++i)
     {
@@ -182,10 +188,75 @@ mini_jit::error_t mini_jit::TensorOperation::setup(dtype_t dtype,
     }
 
     /////////////////////////////////////////////////////////////////////
+    // Find M and N dimensions for dim_t::c (PRIM)
+    /////////////////////////////////////////////////////////////////////
+    if (prim_main == ptype_t::identity)
+    {
+        // For unary operations with dim_t::c, treat the first primitive dimension as M and the second as N
+        for (size_t i = 0; i < m_dim_types.size(); ++i)
+        {
+            if (m_exec_types[i] == exec_t::prim && m_dim_types[i] == dim_t::c)
+            {
+                if (m_strides_in0[i] == 1)
+                {
+                    m_dim_id_prim_M = i;
+                }
+                else
+                {
+                    m_dim_id_prim_N = i;
+                }
+            }
+        }
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    // Check for Transposition
+    /////////////////////////////////////////////////////////////////////
+    if (m_dim_id_prim_M != -1)
+    {
+        int64_t l_stride_in0 = m_strides_in0[m_dim_id_prim_M];
+        int64_t l_stride_out = m_strides_out[m_dim_id_prim_M];
+        // set transpose flag to true if the strides are different
+        m_transpose_output = l_stride_in0 != l_stride_out;
+    }
+    else
+    {
+        // idk if we can check for transposition without M
+        m_transpose_output = false;
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    // Adjust strides based on primitive type and transposition
+    /////////////////////////////////////////////////////////////////////
+    if (prim_main == ptype_t::identity)
+    {
+        if (!m_transpose_output)
+        {
+            m_adjusted_stride_in0 = m_strides_in0[m_dim_id_prim_N];
+            m_adjusted_stride_in1 = 0;
+            m_adjusted_stride_out = m_strides_out[m_dim_id_prim_N];
+        }
+        else
+        {
+            m_adjusted_stride_in0 = m_strides_in0[m_dim_id_prim_N];
+            m_adjusted_stride_in1 = 0;
+            m_adjusted_stride_out = m_strides_out[m_dim_id_prim_M];
+        }
+    }
+    else
+    {
+        // GEMM & BRGEMM
+        m_adjusted_stride_in0 = m_strides_in0[m_dim_id_prim_K];
+        m_adjusted_stride_in1 = m_strides_in1[m_dim_id_prim_N];
+        m_adjusted_stride_out = m_strides_out[m_dim_id_prim_N];
+    }
+
+    /////////////////////////////////////////////////////////////////////
     // Generate kernels
     /////////////////////////////////////////////////////////////////////
     if (prim_first_touch != ptype_t::none)
     {
+        // no transposition
         m_unary_first_touch.generate(m_dim_sizes[m_dim_id_prim_M],
                                      m_dim_sizes[m_dim_id_prim_N],
                                      0,
@@ -195,6 +266,7 @@ mini_jit::error_t mini_jit::TensorOperation::setup(dtype_t dtype,
     }
     if (prim_main == ptype_t::gemm)
     {
+        // no transposition
         m_brgemm_main.generate(m_dim_sizes[m_dim_id_prim_M],
                                m_dim_sizes[m_dim_id_prim_N],
                                m_dim_sizes[m_dim_id_prim_K],
@@ -207,6 +279,7 @@ mini_jit::error_t mini_jit::TensorOperation::setup(dtype_t dtype,
     }
     else if (prim_main == ptype_t::brgemm)
     {
+        // no transposition
         m_brgemm_main.generate(m_dim_sizes[m_dim_id_prim_M],
                                m_dim_sizes[m_dim_id_prim_N],
                                m_dim_sizes[m_dim_id_prim_K],
@@ -219,16 +292,16 @@ mini_jit::error_t mini_jit::TensorOperation::setup(dtype_t dtype,
     }
     else if (prim_main == ptype_t::identity)
     {
-        // TODO: check if transpose or not
         m_unary_main.generate(m_dim_sizes[m_dim_id_prim_M],
                               m_dim_sizes[m_dim_id_prim_N],
-                              0,
+                              m_transpose_output,
                               dtype,
                               prim_main);
         m_kernel_unary_main = m_unary_main.get_kernel();
     }
     if (prim_last_touch != ptype_t::none)
     {
+        // no transposition
         m_unary_last_touch.generate(m_dim_sizes[m_dim_id_prim_M],
                                     m_dim_sizes[m_dim_id_prim_N],
                                     0,
@@ -317,22 +390,22 @@ void mini_jit::TensorOperation::execute_iter(int64_t id_loop,
             if (is_first)
             {
                 execute_kernel_first_touch(sub_ptr_out,
-                                           m_strides_out[m_dim_id_prim_N]);
+                                           m_adjusted_stride_out);
             }
 
             execute_kernel_main(sub_ptr_in0,
                                 sub_ptr_in1,
                                 sub_ptr_out,
-                                m_strides_in0[m_dim_id_prim_K],
-                                m_strides_in1[m_dim_id_prim_N],
-                                m_strides_out[m_dim_id_prim_N],
+                                m_adjusted_stride_in0,
+                                m_adjusted_stride_in1,
+                                m_adjusted_stride_out,
                                 m_dim_id_prim_BR != -1 ? m_strides_in0[m_dim_id_prim_BR] : 1,
                                 m_dim_id_prim_BR != -1 ? m_strides_in1[m_dim_id_prim_BR] : 1);
 
             if (is_last)
             {
                 execute_kernel_last_touch(sub_ptr_out,
-                                          m_strides_out[m_dim_id_prim_N]);
+                                          m_adjusted_stride_out);
             }
         }
     }

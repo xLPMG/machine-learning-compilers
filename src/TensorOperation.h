@@ -107,6 +107,16 @@ private:
     /// number of parallel loops
     int64_t m_num_parallel_loops;
 
+    /// whether the output should be transposed
+    bool m_transpose_output = false;
+
+    /// stride in first input tensor adjusted for transposition
+    int64_t m_adjusted_stride_in0 = 0;
+    /// stride in second input tensor adjusted for transposition
+    int64_t m_adjusted_stride_in1 = 0;
+    /// stride in output tensor adjusted for transposition
+    int64_t m_adjusted_stride_out = 0;
+
     /**
      * Executes the first touch kernel.
      *
