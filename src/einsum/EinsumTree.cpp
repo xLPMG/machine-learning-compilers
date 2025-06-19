@@ -21,7 +21,17 @@ mini_jit::einsum::EinsumNode *mini_jit::einsum::EinsumTree::parse_einsum_express
     }
 
     mini_jit::einsum::EinsumNode *l_root_node = parse_einsum_expression_recursive(einsum_expression);
+
+    // plain swapping is not needed anymore,
+    // since the reordering will do swapping as well
+    // swap_nodes(l_root_node);
+
+    // reordering is necessary to make the tree executable
+    // it also needs to be done before initializing the nodes
+    reorder_node_dimensions(l_root_node);
+
     initialize_einsum_nodes(l_root_node, dimension_sizes);
+
     return l_root_node;
 }
 
@@ -112,40 +122,40 @@ std::vector<int64_t> mini_jit::einsum::EinsumTree::get_dimensions_from_expressio
     return l_dims;
 }
 
-void mini_jit::einsum::EinsumTree::initialize_einsum_nodes(EinsumNode *einsum_node,
+void mini_jit::einsum::EinsumTree::initialize_einsum_nodes(EinsumNode *root_node,
                                                            std::vector<int64_t> &dimension_sizes)
 {
-    if (einsum_node == nullptr)
+    if (root_node == nullptr)
     {
         return;
     }
 
-    initialize_einsum_nodes(einsum_node->m_left_child, dimension_sizes);
-    initialize_einsum_nodes(einsum_node->m_right_child, dimension_sizes);
+    initialize_einsum_nodes(root_node->m_left_child, dimension_sizes);
+    initialize_einsum_nodes(root_node->m_right_child, dimension_sizes);
 
     //////////////////////////////////////////////////////////////////
     // GATHER AND SORT ALL USED IDS
     //////////////////////////////////////////////////////////////////
 
     // this is already given
-    std::vector<int64_t> *l_output_dimension_ids = &einsum_node->m_output_dimension_ids;
+    std::vector<int64_t> *l_output_dimension_ids = &root_node->m_output_dimension_ids;
     // these will be initialized
-    std::vector<int64_t> *l_operation_dim_ids = &einsum_node->m_dimension_ids;
-    std::vector<int64_t> *l_dim_sizes = &einsum_node->m_dim_sizes;
+    std::vector<int64_t> *l_operation_dim_ids = &root_node->m_dimension_ids;
+    std::vector<int64_t> *l_dim_sizes = &root_node->m_dim_sizes;
     // local vector of sizes of the output dimensions
-    std::vector<int64_t> l_out_dim_sizes = einsum_node->m_dim_sizes;
+    std::vector<int64_t> l_out_dim_sizes = root_node->m_dim_sizes;
 
     // add ids from output
-    for (auto dim_id : einsum_node->m_output_dimension_ids)
+    for (auto dim_id : root_node->m_output_dimension_ids)
     {
         l_operation_dim_ids->push_back(dim_id);
         l_dim_sizes->push_back(dimension_sizes[dim_id]);
         l_out_dim_sizes.push_back(dimension_sizes[dim_id]);
     }
     // add ids from children (for 1 child, the ids are the same as the output ids)
-    if (einsum_node->get_number_of_children() == 2)
+    if (root_node->get_number_of_children() == 2)
     {
-        for (auto dim_id : einsum_node->m_left_child->m_output_dimension_ids)
+        for (auto dim_id : root_node->m_left_child->m_output_dimension_ids)
         {
             // check if the dimension id is already in the list
             if (!contains(*l_operation_dim_ids, dim_id))
@@ -154,7 +164,7 @@ void mini_jit::einsum::EinsumTree::initialize_einsum_nodes(EinsumNode *einsum_no
                 l_dim_sizes->push_back(dimension_sizes[dim_id]);
             }
         }
-        for (auto dim_id : einsum_node->m_right_child->m_output_dimension_ids)
+        for (auto dim_id : root_node->m_right_child->m_output_dimension_ids)
         {
             // check if the dimension id is already in the list
             if (!contains(*l_operation_dim_ids, dim_id))
@@ -166,25 +176,25 @@ void mini_jit::einsum::EinsumTree::initialize_einsum_nodes(EinsumNode *einsum_no
     }
 
     // compute the size of the output tensor
-    einsum_node->m_tensor_size = 1;
+    root_node->m_tensor_size = 1;
     for (auto &dim_id : *l_output_dimension_ids)
     {
-        einsum_node->m_tensor_size *= dimension_sizes[dim_id];
+        root_node->m_tensor_size *= dimension_sizes[dim_id];
     }
 
     //////////////////////////////////////////////////////////////////
     // INIT VECTORS
     //////////////////////////////////////////////////////////////////
 
-    std::vector<dim_t> *l_dim_types = &einsum_node->m_dim_types;
+    std::vector<dim_t> *l_dim_types = &root_node->m_dim_types;
     l_dim_types->resize(l_operation_dim_ids->size(), dim_t::k);
-    std::vector<exec_t> *l_exec_types = &einsum_node->m_exec_types;
+    std::vector<exec_t> *l_exec_types = &root_node->m_exec_types;
     l_exec_types->resize(l_operation_dim_ids->size(), exec_t::seq);
-    std::vector<int64_t> *l_strides_in0 = &einsum_node->m_strides_in0;
+    std::vector<int64_t> *l_strides_in0 = &root_node->m_strides_in0;
     l_strides_in0->resize(l_operation_dim_ids->size(), 0);
-    std::vector<int64_t> *l_strides_in1 = &einsum_node->m_strides_in1;
+    std::vector<int64_t> *l_strides_in1 = &root_node->m_strides_in1;
     l_strides_in1->resize(l_operation_dim_ids->size(), 0);
-    std::vector<int64_t> *l_strides_out = &einsum_node->m_strides_out;
+    std::vector<int64_t> *l_strides_out = &root_node->m_strides_out;
     l_strides_out->resize(l_operation_dim_ids->size(), 0);
 
     for (size_t i = 0; i < l_operation_dim_ids->size(); i++)
@@ -197,17 +207,17 @@ void mini_jit::einsum::EinsumTree::initialize_einsum_nodes(EinsumNode *einsum_no
 
         int64_t l_dim_id = (*l_operation_dim_ids)[i];
 
-        if (einsum_node->get_number_of_children() == 2)
+        if (root_node->get_number_of_children() == 2)
         {
             // Dimension M
             if (contains(*l_output_dimension_ids, l_dim_id) &&
-                contains(einsum_node->m_left_child->m_output_dimension_ids, l_dim_id))
+                contains(root_node->m_left_child->m_output_dimension_ids, l_dim_id))
             {
                 (*l_dim_types)[i] = dim_t::m;
             }
             // Dimension N
             else if (contains(*l_output_dimension_ids, l_dim_id) &&
-                     contains(einsum_node->m_right_child->m_output_dimension_ids, l_dim_id))
+                     contains(root_node->m_right_child->m_output_dimension_ids, l_dim_id))
             {
                 (*l_dim_types)[i] = dim_t::n;
             }
@@ -218,33 +228,33 @@ void mini_jit::einsum::EinsumTree::initialize_einsum_nodes(EinsumNode *einsum_no
         }
 
         // stride_in0
-        if (einsum_node->m_left_child != nullptr &&
-            contains(einsum_node->m_left_child->m_output_dimension_ids, l_dim_id))
+        if (root_node->m_left_child != nullptr &&
+            contains(root_node->m_left_child->m_output_dimension_ids, l_dim_id))
         {
             int64_t stride = 1;
-            auto it = std::find(einsum_node->m_left_child->m_output_dimension_ids.begin(),
-                                einsum_node->m_left_child->m_output_dimension_ids.end(),
+            auto it = std::find(root_node->m_left_child->m_output_dimension_ids.begin(),
+                                root_node->m_left_child->m_output_dimension_ids.end(),
                                 l_dim_id);
-            size_t index = std::distance(einsum_node->m_left_child->m_output_dimension_ids.begin(), it);
-            for (size_t j = index + 1; j < einsum_node->m_left_child->m_output_dimension_ids.size(); ++j)
+            size_t index = std::distance(root_node->m_left_child->m_output_dimension_ids.begin(), it);
+            for (size_t j = index + 1; j < root_node->m_left_child->m_output_dimension_ids.size(); ++j)
             {
-                stride *= dimension_sizes[einsum_node->m_left_child->m_output_dimension_ids[j]];
+                stride *= dimension_sizes[root_node->m_left_child->m_output_dimension_ids[j]];
             }
             (*l_strides_in0)[i] = stride;
         }
 
         // stride_in1
-        if (einsum_node->m_right_child != nullptr &&
-            contains(einsum_node->m_right_child->m_output_dimension_ids, l_dim_id))
+        if (root_node->m_right_child != nullptr &&
+            contains(root_node->m_right_child->m_output_dimension_ids, l_dim_id))
         {
             int64_t stride = 1;
-            auto it = std::find(einsum_node->m_right_child->m_output_dimension_ids.begin(),
-                                einsum_node->m_right_child->m_output_dimension_ids.end(),
+            auto it = std::find(root_node->m_right_child->m_output_dimension_ids.begin(),
+                                root_node->m_right_child->m_output_dimension_ids.end(),
                                 l_dim_id);
-            size_t index = std::distance(einsum_node->m_right_child->m_output_dimension_ids.begin(), it);
-            for (size_t j = index + 1; j < einsum_node->m_right_child->m_output_dimension_ids.size(); ++j)
+            size_t index = std::distance(root_node->m_right_child->m_output_dimension_ids.begin(), it);
+            for (size_t j = index + 1; j < root_node->m_right_child->m_output_dimension_ids.size(); ++j)
             {
-                stride *= dimension_sizes[einsum_node->m_right_child->m_output_dimension_ids[j]];
+                stride *= dimension_sizes[root_node->m_right_child->m_output_dimension_ids[j]];
             }
             (*l_strides_in1)[i] = stride;
         }
@@ -257,113 +267,107 @@ void mini_jit::einsum::EinsumTree::initialize_einsum_nodes(EinsumNode *einsum_no
             size_t index = std::distance(l_output_dimension_ids->begin(), it);
             for (size_t j = index + 1; j < l_output_dimension_ids->size(); ++j)
             {
-                stride *= dimension_sizes[einsum_node->m_output_dimension_ids[j]];
+                stride *= dimension_sizes[root_node->m_output_dimension_ids[j]];
             }
             (*l_strides_out)[i] = stride;
         }
     }
 }
 
-void mini_jit::einsum::EinsumTree::optimize_einsum_nodes(EinsumNode *einsum_node,
+void mini_jit::einsum::EinsumTree::optimize_einsum_nodes(EinsumNode *root_node,
                                                          int64_t thread_target,
                                                          int64_t max_kernel_size)
 {
-    if (einsum_node == nullptr)
+    if (root_node == nullptr)
     {
         return;
     }
 
     // no optimizations for input nodes
-    if (einsum_node->get_number_of_children() == 0)
+    if (root_node->get_number_of_children() == 0)
     {
         return;
     }
 
     // optimize children
-    if (einsum_node->m_left_child)
-    {
-        optimize_einsum_nodes(einsum_node->m_left_child, thread_target, max_kernel_size);
-    }
-    if (einsum_node->m_right_child)
-    {
-        optimize_einsum_nodes(einsum_node->m_right_child, thread_target, max_kernel_size);
-    }
+    optimize_einsum_nodes(root_node->m_left_child, thread_target, max_kernel_size);
+    optimize_einsum_nodes(root_node->m_right_child, thread_target, max_kernel_size);
 
     // optimize current node
-    mini_jit::ir::Optimizer::optimize(einsum_node->m_dim_types,
-                                      einsum_node->m_exec_types,
-                                      einsum_node->m_dim_sizes,
-                                      einsum_node->m_strides_in0,
-                                      einsum_node->m_strides_in1,
-                                      einsum_node->m_strides_out,
+    mini_jit::ir::Optimizer::optimize(root_node->m_dim_types,
+                                      root_node->m_exec_types,
+                                      root_node->m_dim_sizes,
+                                      root_node->m_strides_in0,
+                                      root_node->m_strides_in1,
+                                      root_node->m_strides_out,
                                       thread_target,
                                       max_kernel_size);
 }
 
-void mini_jit::einsum::EinsumTree::lower_einsum_nodes_to_tensor_operations(EinsumNode *einsum_node,
+void mini_jit::einsum::EinsumTree::lower_einsum_nodes_to_tensor_operations(EinsumNode *root_node,
                                                                            std::vector<int64_t> &dimension_sizes,
                                                                            mini_jit::dtype_t dtype)
 {
-    if (einsum_node == nullptr)
+    if (root_node == nullptr)
     {
         return;
     }
 
     // operations for all nodes
-    einsum_node->m_dtype = dtype;
-    einsum_node->m_computational_operations = 0.0;
+    root_node->m_dtype = dtype;
+    root_node->m_computational_operations = 0.0;
 
     // no further operations for input nodes
-    if (einsum_node->get_number_of_children() == 0)
+    if (root_node->get_number_of_children() == 0)
     {
         return;
     }
 
     // lower children
-    lower_einsum_nodes_to_tensor_operations(einsum_node->m_left_child, dimension_sizes, dtype);
-    lower_einsum_nodes_to_tensor_operations(einsum_node->m_right_child, dimension_sizes, dtype);
+    lower_einsum_nodes_to_tensor_operations(root_node->m_left_child, dimension_sizes, dtype);
+    lower_einsum_nodes_to_tensor_operations(root_node->m_right_child, dimension_sizes, dtype);
 
     // lower current node
-    int l_prim_count = std::count(einsum_node->m_exec_types.begin(), einsum_node->m_exec_types.end(), exec_t::prim);
+    int l_prim_count = std::count(root_node->m_exec_types.begin(), root_node->m_exec_types.end(), exec_t::prim);
     mini_jit::ptype_t l_main_ptype = mini_jit::ptype_t::none;
     if (l_prim_count == 2)
     {
         l_main_ptype = mini_jit::ptype_t::identity;
-        einsum_node->m_computational_operations = 0.0; // no operations for identity
+        root_node->m_computational_operations = 0.0; // no operations for identity
     }
     else if (l_prim_count == 3)
     {
         l_main_ptype = mini_jit::ptype_t::gemm;
-        einsum_node->m_computational_operations = 2.0f;
-        for (int64_t size : einsum_node->m_dim_sizes)
+        root_node->m_computational_operations = 2.0f;
+        for (int64_t size : root_node->m_dim_sizes)
         {
-            einsum_node->m_computational_operations *= size;
+            root_node->m_computational_operations *= size;
         }
     }
     else if (l_prim_count == 4)
     {
         l_main_ptype = mini_jit::ptype_t::brgemm;
-        einsum_node->m_computational_operations = 2.0f;
-        for (int64_t size : einsum_node->m_dim_sizes)
+        root_node->m_computational_operations = 2.0f;
+        for (int64_t size : root_node->m_dim_sizes)
         {
-            einsum_node->m_computational_operations *= size;
+            root_node->m_computational_operations *= size;
         }
     }
 
     // add child ops
-    einsum_node->m_computational_operations += einsum_node->m_left_child ? einsum_node->m_left_child->m_computational_operations : 0.0;
-    einsum_node->m_computational_operations += einsum_node->m_right_child ? einsum_node->m_right_child->m_computational_operations : 0.0;
+    root_node->m_computational_operations += root_node->m_left_child ? root_node->m_left_child->m_computational_operations : 0.0;
+    root_node->m_computational_operations += root_node->m_right_child ? root_node->m_right_child->m_computational_operations : 0.0;
 
-    einsum_node->m_operation.setup(einsum_node->m_dtype,
-                                   ptype_t::none,
-                                   l_main_ptype,
-                                   ptype_t::none,
-                                   einsum_node->m_dim_types,
-                                   einsum_node->m_exec_types,
-                                   einsum_node->m_dim_sizes,
-                                   einsum_node->m_strides_in0,
-                                   einsum_node->m_strides_in1,
-                                   einsum_node->m_strides_out);
+    root_node->m_operation.setup(root_node->m_dtype,
+                                 ptype_t::none,
+                                 l_main_ptype,
+                                 ptype_t::none,
+                                 root_node->m_dim_types,
+                                 root_node->m_exec_types,
+                                 root_node->m_dim_sizes,
+                                 root_node->m_strides_in0,
+                                 root_node->m_strides_in1,
+                                 root_node->m_strides_out);
 }
 
 void mini_jit::einsum::EinsumTree::execute(EinsumNode *root_node,
@@ -428,27 +432,219 @@ void mini_jit::einsum::EinsumTree::execute(EinsumNode *root_node,
         }
         else
         {
-            throw std::invalid_argument("Error: No input tensor found for leaf node with expression: " + root_node->m_tensor_expression);
+            throw std::invalid_argument("Error: No input tensor found for leaf node with expression: " +
+                                        root_node->m_tensor_expression);
         }
     }
     // we are not a leaf node -> compute children and execute operation
     else
     {
         // compute children
-        if (root_node->m_left_child != nullptr)
-        {
-            execute(root_node->m_left_child, dimension_sizes, tensor_inputs);
-        }
-
-        if (root_node->m_right_child != nullptr)
-        {
-            execute(root_node->m_right_child, dimension_sizes, tensor_inputs);
-        }
+        execute(root_node->m_left_child, dimension_sizes, tensor_inputs);
+        execute(root_node->m_right_child, dimension_sizes, tensor_inputs);
 
         // execute operation
         auto l_ptr_right_child = root_node->m_right_child ? root_node->m_right_child->m_tensor_out : nullptr;
         root_node->m_operation.execute(root_node->m_left_child->m_tensor_out,
                                        l_ptr_right_child,
                                        root_node->m_tensor_out);
+    }
+}
+
+void mini_jit::einsum::EinsumTree::reorder_node_dimensions(EinsumNode *root_node)
+{
+    if (root_node == nullptr || root_node->get_number_of_children() == 0)
+    {
+        // since we view root_node as the parent node where the children are reordered,
+        // we do not need to do anything for leaf nodes
+        return;
+    }
+
+    // one child -> identity operation and not a contraction
+    // -> no need to reorder dimensions here
+    if (root_node->get_number_of_children() == 1)
+    {
+        reorder_node_dimensions(root_node->m_left_child);
+        return;
+    }
+
+    int64_t l_unit_stride_root_node = root_node->m_output_dimension_ids.size() - 1;
+    int64_t l_unit_stride_left_child = root_node->m_left_child->m_output_dimension_ids.size() - 1;
+
+    // Assumption: The parent's order is correct (parent specifies the order)
+    int64_t l_parent_dim_id = root_node->m_output_dimension_ids[l_unit_stride_root_node];
+
+    // Find unit stride for M
+    if (contains(root_node->m_right_child->m_output_dimension_ids,
+                 root_node->m_output_dimension_ids[l_unit_stride_root_node]))
+    {
+        // swap children
+        EinsumNode *l_temp_node = root_node->m_left_child;
+
+        root_node->m_left_child = root_node->m_right_child;
+        root_node->m_right_child = l_temp_node;
+
+        l_unit_stride_left_child = root_node->m_left_child->m_output_dimension_ids.size() - 1;
+    }
+
+    auto l_dim_child_m_it = std::find_if(root_node->m_left_child->m_output_dimension_ids.begin(),
+                                         root_node->m_left_child->m_output_dimension_ids.end(),
+                                         [l_parent_dim_id](const int64_t dim_id)
+                                         {
+                                             return (dim_id == l_parent_dim_id);
+                                         });
+
+    // no M found
+    if (l_dim_child_m_it == root_node->m_left_child->m_output_dimension_ids.end())
+    {
+        throw std::invalid_argument("EinsumTree: No M dimension found for child " +
+                                    root_node->m_left_child->m_tensor_expression +
+                                    " and parent " +
+                                    root_node->m_tensor_expression);
+    }
+    // M is in output dims but not the right-most element
+    else if (l_dim_child_m_it < root_node->m_left_child->m_output_dimension_ids.end() - 1)
+    {
+        EinsumNode *l_left_child_permute = new EinsumNode(root_node->m_left_child->m_output_dimension_ids,
+                                                          root_node->m_left_child->m_tensor_expression,
+                                                          root_node->m_left_child,
+                                                          nullptr);
+
+        // move M dimension to the right-most position
+        // Calculate the position in the new vector and rotate
+        size_t l_m_position = std::distance(root_node->m_left_child->m_output_dimension_ids.begin(), l_dim_child_m_it);
+        auto l_new_m_it = l_left_child_permute->m_output_dimension_ids.begin() + l_m_position;
+        std::rotate(l_new_m_it, l_new_m_it + 1, l_left_child_permute->m_output_dimension_ids.end());
+
+        // update expression of the new permute node
+        std::string l_new_expression = "";
+        for (size_t i = 0; i < l_left_child_permute->m_output_dimension_ids.size(); i++)
+        {
+            if (i > 0)
+            {
+                l_new_expression += ",";
+            }
+            l_new_expression += std::to_string(l_left_child_permute->m_output_dimension_ids[i]);
+        }
+        l_left_child_permute->m_tensor_expression = l_new_expression;
+
+        // insert into the tree
+        root_node->m_left_child = l_left_child_permute;
+    }
+
+    // Find K in left child
+    int64_t l_k_dim_index = l_unit_stride_left_child;
+    for (int i = l_unit_stride_left_child; i >= 0; i--)
+    {
+        if (contains(root_node->m_right_child->m_output_dimension_ids,
+                     root_node->m_left_child->m_output_dimension_ids[i]))
+        {
+            l_k_dim_index = i;
+            break;
+        }
+    }
+
+    int64_t l_k_dim_id = root_node->m_left_child->m_output_dimension_ids[l_k_dim_index];
+    auto l_dim_child_k_it = std::find_if(root_node->m_right_child->m_output_dimension_ids.begin(),
+                                         root_node->m_right_child->m_output_dimension_ids.end(),
+                                         [l_k_dim_id](const int64_t dim_id)
+                                         {
+                                             return (dim_id == l_k_dim_id);
+                                         });
+
+    // no K found
+    if (l_dim_child_k_it == root_node->m_right_child->m_output_dimension_ids.end())
+    {
+        throw std::invalid_argument("EinsumTree: No K dimension found for child " +
+                                    root_node->m_right_child->m_tensor_expression +
+                                    " and parent " +
+                                    root_node->m_tensor_expression);
+    }
+    // K is in output dims but not the right-most element
+    else if (l_dim_child_k_it < root_node->m_right_child->m_output_dimension_ids.end() - 1)
+    {
+        EinsumNode *l_right_child_permute = new EinsumNode(root_node->m_right_child->m_output_dimension_ids,
+                                                           root_node->m_right_child->m_tensor_expression,
+                                                           root_node->m_right_child,
+                                                           nullptr);
+
+        // move K dimension to the right-most position
+        // Calculate the position in the new vector and rotate
+        size_t l_k_position = std::distance(root_node->m_right_child->m_output_dimension_ids.begin(), l_dim_child_k_it);
+        auto l_new_k_it = l_right_child_permute->m_output_dimension_ids.begin() + l_k_position;
+        std::rotate(l_new_k_it, l_new_k_it + 1, l_right_child_permute->m_output_dimension_ids.end());
+
+        // update expression of the new permute node
+        std::string l_new_expression = "";
+        for (size_t i = 0; i < l_right_child_permute->m_output_dimension_ids.size(); i++)
+        {
+            if (i > 0)
+            {
+                l_new_expression += ",";
+            }
+            l_new_expression += std::to_string(l_right_child_permute->m_output_dimension_ids[i]);
+        }
+        l_right_child_permute->m_tensor_expression = l_new_expression;
+
+        // insert into the tree
+        root_node->m_right_child = l_right_child_permute;
+    }
+
+    // recursively call children
+    reorder_node_dimensions(root_node->m_left_child);
+    reorder_node_dimensions(root_node->m_right_child);
+}
+
+void mini_jit::einsum::EinsumTree::swap_nodes(EinsumNode *root_node)
+{
+    if (root_node == nullptr || root_node->get_number_of_children() == 0)
+    {
+        return;
+    }
+
+    if (root_node->get_number_of_children() == 1)
+    {
+        swap_nodes(root_node->m_left_child);
+        return;
+    }
+
+    // recursively swap children
+    swap_nodes(root_node->m_left_child);
+    swap_nodes(root_node->m_right_child);
+
+    int64_t l_unit_stride_root_node = root_node->m_output_dimension_ids.size() - 1;
+    int64_t l_unit_stride_left_child = root_node->m_left_child->m_output_dimension_ids.size() - 1;
+    int64_t l_unit_stride_right_child = root_node->m_right_child->m_output_dimension_ids.size() - 1;
+
+    // swap nodes if
+    // (A) the right child and the root node have the same unit stride, AND
+    // (B) if the right childs output dimension ids contain the left childs unit stride somewhere
+    if (root_node->m_output_dimension_ids[l_unit_stride_root_node] == root_node->m_right_child->m_output_dimension_ids[l_unit_stride_right_child] &&
+        contains(root_node->m_right_child->m_output_dimension_ids, root_node->m_left_child->m_output_dimension_ids[l_unit_stride_left_child]))
+    {
+        EinsumNode *l_temp_node = root_node->m_left_child;
+        root_node->m_left_child = root_node->m_right_child;
+        root_node->m_right_child = l_temp_node;
+    }
+}
+
+std::string mini_jit::einsum::EinsumTree::to_string(EinsumNode *root_node)
+{
+    if (root_node == nullptr)
+    {
+        return "";
+    }
+
+    if (root_node->get_number_of_children() == 0)
+    {
+        return root_node->m_tensor_expression;
+    }
+    else if (root_node->get_number_of_children() == 1)
+    {
+        return "[" + to_string(root_node->m_left_child) + "]->[" + root_node->m_tensor_expression + "]";
+    }
+    else
+    {
+        return "[" + to_string(root_node->m_left_child) + "],[" + to_string(root_node->m_right_child) + "]->[" + root_node->m_tensor_expression + "]";
     }
 }
