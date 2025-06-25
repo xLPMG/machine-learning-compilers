@@ -6,6 +6,8 @@
 #include "fmax.h"
 #include "fmla.h"
 #include "fmul.h"
+#include "frecpe.h"
+#include "frecps.h"
 #include "ld1.h"
 #include "ldp.h"
 #include "ldr.h"
