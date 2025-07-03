@@ -3,6 +3,7 @@
 
 #include "decrement_primitive.h"
 #include "decrement_trans_primitive.h"
+#include "fast_sigmoid_primitive.h"
 #include "identity_primitive.h"
 #include "identity_trans_primitive.h"
 #include "increment_primitive.h"
@@ -11,6 +12,8 @@
 #include "reciprocal_trans_primitive.h"
 #include "relu_primitive.h"
 #include "relu_trans_primitive.h"
+#include "sigmoid_interp_primitive.h"
+#include "sigmoid_taylor_primitive.h"
 #include "square_primitive.h"
 #include "square_trans_primitive.h"
 #include "zero_primitive_xzr.h"

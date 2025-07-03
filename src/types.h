@@ -43,6 +43,9 @@ namespace mini_jit
         div = 12,
         min = 13,
         max = 14,
+        fast_sigmoid = 15,
+        sigmoid_interp = 16,
+        sigmoid_taylor = 17,
         none = 99
     };
 
@@ -63,6 +66,9 @@ namespace mini_jit
             case ptype_t::div: return "div";
             case ptype_t::min: return "min";
             case ptype_t::max: return "max";
+            case ptype_t::fast_sigmoid: return "fast_sigmoid";
+            case ptype_t::sigmoid_interp: return "sigmoid_interpolation";
+            case ptype_t::sigmoid_taylor: return "sigmoid_taylor";
             case ptype_t::none: return "none";
             default: return "unknown";
         }
@@ -75,7 +81,6 @@ namespace mini_jit
         m = 1,
         n = 2,
         k = 3,
-        undefined = 99
     };
 
     inline const std::string to_string(dim_t d) {
@@ -84,7 +89,6 @@ namespace mini_jit
             case dim_t::m: return "m";
             case dim_t::n: return "n";
             case dim_t::k: return "k";
-            case dim_t::undefined: return "undefined";
             default: return "unknown";
         }
     }

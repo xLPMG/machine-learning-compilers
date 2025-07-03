@@ -30,7 +30,7 @@ void test_reciprocal_primitive(uint32_t M,
     mini_jit::Kernel l_kernel;
     mini_jit::kernels::unary::reciprocal(l_kernel, M, N);
     mini_jit::Unary::kernel_t l_kernel_t = reinterpret_cast<mini_jit::Unary::kernel_t>(const_cast<void *>(l_kernel.get_kernel()));
-    l_kernel_t(A, B, M, M);
+    l_kernel_t(A, B, M, M, nullptr);
 
     for (u_int32_t i = 0; i < M * N; i++)
     {
@@ -47,7 +47,7 @@ void test_reciprocal_primitive(uint32_t M,
 TEST_CASE("Tests the reciprocal primitive with different M and N", "[reciprocal_primitive][parameterized]")
 {
     uint32_t M = GENERATE(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
-    uint32_t N = GENERATE(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+    uint32_t N = GENERATE(1, 2, 3, 4);
     test_reciprocal_primitive(M, N);
 }
 

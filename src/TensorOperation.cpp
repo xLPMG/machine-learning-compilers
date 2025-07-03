@@ -17,7 +17,10 @@ mini_jit::error_t mini_jit::TensorOperation::setup(dtype_t dtype,
     /////////////////////////////////////////////////////////////////////
     // Check the number of dimensions
     /////////////////////////////////////////////////////////////////////
-    if (dim_types.size() != dim_sizes.size() || dim_types.size() != strides_in0.size() || dim_types.size() != strides_in1.size() || dim_types.size() != strides_out.size())
+    if (dim_types.size() != dim_sizes.size() ||
+        dim_types.size() != strides_in0.size() ||
+        dim_types.size() != strides_in1.size() ||
+        dim_types.size() != strides_out.size())
     {
         return error_t::wrong_dimension;
     }
@@ -86,7 +89,10 @@ mini_jit::error_t mini_jit::TensorOperation::setup(dtype_t dtype,
         ptype_t::square, 
         ptype_t::reciprocal,
         ptype_t::increment,
-        ptype_t::decrement
+        ptype_t::decrement,
+        ptype_t::fast_sigmoid,
+        ptype_t::sigmoid_interp,
+        ptype_t::sigmoid_taylor,
     };
 
     if (std::find(allowed_first_touch_types.begin(), allowed_first_touch_types.end(), prim_first_touch) == allowed_first_touch_types.end())
@@ -546,7 +552,8 @@ void mini_jit::TensorOperation::execute_kernel_first_touch(char *ptr_out,
         m_kernel_first_touch(nullptr,
                              ptr_out,
                              0,
-                             ldOut);
+                             ldOut,
+                             m_unary_first_touch.get_extra());
     }
     else if (m_kernel_first_touch_type == ptype_t::relu || 
              m_kernel_first_touch_type == ptype_t::square || 
@@ -557,7 +564,8 @@ void mini_jit::TensorOperation::execute_kernel_first_touch(char *ptr_out,
         m_kernel_first_touch(ptr_out,
                              ptr_out,
                              ldOut,
-                             ldOut);
+                             ldOut,
+                             m_unary_first_touch.get_extra());
     }
 }
 
@@ -597,7 +605,8 @@ void mini_jit::TensorOperation::execute_kernel_main(char const *ptr_in0,
         m_kernel_unary_main(ptr_in0,
                             ptr_out,
                             ldA,
-                            ldC);
+                            ldC,
+                            m_unary_main.get_extra());
     }
     else if (m_kernel_main_type == ptype_t::add || m_kernel_main_type == ptype_t::sub ||
              m_kernel_main_type == ptype_t::mul || m_kernel_main_type == ptype_t::div ||
@@ -620,17 +629,21 @@ void mini_jit::TensorOperation::execute_kernel_last_touch(char *ptr_out,
         m_kernel_last_touch(nullptr,
                             ptr_out,
                             0,
-                            ldOut);
+                            ldOut,
+                            m_unary_last_touch.get_extra());
     }
     else if (m_kernel_last_touch_type == ptype_t::relu || 
              m_kernel_last_touch_type == ptype_t::square || 
              m_kernel_last_touch_type == ptype_t::reciprocal ||
              m_kernel_last_touch_type == ptype_t::increment ||
-             m_kernel_last_touch_type == ptype_t::decrement)
+             m_kernel_last_touch_type == ptype_t::decrement ||
+             m_kernel_last_touch_type == ptype_t::fast_sigmoid ||
+             m_kernel_last_touch_type == ptype_t::sigmoid_taylor)
     {
         m_kernel_last_touch(ptr_out,
                             ptr_out,
                             ldOut,
-                            ldOut);
+                            ldOut,
+                            m_unary_last_touch.get_extra());
     }
 }

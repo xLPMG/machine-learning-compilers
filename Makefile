@@ -17,6 +17,7 @@ TEST_DIR = tests
 UNIT_TESTS_DIR = $(TEST_DIR)/unit
 INT_TESTS_DIR = $(TEST_DIR)/integration
 BIN_DIR_ROOT = build
+KERNELS_DIR = $(BIN_DIR_ROOT)/kernels
 LIB_DIR = 
 INC_DIR = include
 SUB_DIR = $(SRC_DIR)/submissions
@@ -28,6 +29,9 @@ CXXFLAGS += -g
 CXXFLAGS += -Wall
 CXXFLAGS += -Wextra
 CXXFLAGS += -Wpedantic
+# Suppress warnings from Catch2 and standard library regex
+CXXFLAGS += -Wno-maybe-uninitialized
+CXXFLAGS += -Wno-unknown-warning-option
 
 # LINKER FLAGS
 LDFLAGS = 
@@ -223,3 +227,4 @@ tests-san: unit-tests-san int-tests-san
 
 clean:
 	rm -rf $(BIN_DIR)
+	rm -rf $(KERNELS_DIR)

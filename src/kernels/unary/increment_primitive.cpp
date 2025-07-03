@@ -5,31 +5,13 @@
 #include "registers/simd_fp_registers.h"
 #include "instructions/all_instructions.h"
 
-namespace inst = mini_jit::instructions;
-namespace base = inst::base;
-namespace simd_fp = inst::simd_fp;
-
 using enum gpr_t;
 using enum simd_fp_t;
 using enum neon_size_spec_t;
 using enum arr_spec_t;
 
-using base::stpPre;
-using base::movSP;
-using base::lsl;
-using base::mov;
-using base::add;
-using base::sub;
-using base::cbnz;
-using base::ldpPost;
-using simd_fp::ldp;
-using simd_fp::stp;
-using simd_fp::ldr;
-using simd_fp::str;
-using simd_fp::fmovVec;
-using simd_fp::fmovScalar;
-using simd_fp::faddVec;
-using simd_fp::faddScalar;
+using namespace mini_jit::instructions::base;
+using namespace mini_jit::instructions::simd_fp;
 
 void mini_jit::kernels::unary::increment(mini_jit::Kernel &kernel,
                                          u_int32_t m,
@@ -62,7 +44,7 @@ void mini_jit::kernels::unary::increment(mini_jit::Kernel &kernel,
         mov(x6, n),
 
         // Set register with value 1
-        fmovVec(v19, 1, s4), 
+        fmovIntVec(v19, 1, s4), 
     });
 
     // Start n loop (1 column)
@@ -164,9 +146,9 @@ void mini_jit::kernels::unary::increment(mini_jit::Kernel &kernel,
                 faddVec(v1, v0, v19, s4),
                 str(v1, x9, 0, q),
                 // 2 elements
-                ldr(v0, x8, 4*4, d),
-                faddVec(v2, v0, v19, s2),
-                str(v2, x9, 4*4, d)
+                ldr(v2, x8, 4*4, d),
+                faddVec(v3, v2, v19, s2),
+                str(v3, x9, 4*4, d)
             });
             break;
         case 7:
@@ -325,7 +307,7 @@ void mini_jit::kernels::unary::increment(mini_jit::Kernel &kernel,
     // Restore stack pointer
     kernel.add_instr(ldpPost(x29, x30, sp, 16));
 
-    kernel.add_instr(inst::ret());
+    kernel.add_instr(ret());
     kernel.write("increment_primitive.bin");
     kernel.set_kernel();
 }

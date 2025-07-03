@@ -6,16 +6,16 @@
 #include "Kernel.h"
 #include "Unary.h"
 
-mini_jit::benchmarks::Relu_primitive_bench::Relu_primitive_bench(double runTime,
-                                                                 uint32_t m,
-                                                                 uint32_t n) : Benchmark()
+mini_jit::benchmarks::ReLUPrimitiveBench::ReLUPrimitiveBench(double runTime,
+                                                             uint32_t m,
+                                                             uint32_t n) : Benchmark()
 {
     m_M = m;
     m_N = n;
     m_runTime = runTime;
 }
 
-void mini_jit::benchmarks::Relu_primitive_bench::run()
+void mini_jit::benchmarks::ReLUPrimitiveBench::run()
 {
     m_A = new float[m_M * m_N];
     m_B = new float[m_M * m_N];
@@ -43,7 +43,7 @@ void mini_jit::benchmarks::Relu_primitive_bench::run()
     double l_runTimeMs = m_runTime * 1e6;
     do
     {
-        l_kernel_t(m_A, m_B, m_M, m_M);
+        l_kernel_t(m_A, m_B, m_M, m_M, nullptr);
         ++l_num_reps;
         auto l_now = std::chrono::high_resolution_clock::now();
         l_elapsed = std::chrono::duration_cast<std::chrono::microseconds>(l_now - l_start_time).count();
