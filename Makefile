@@ -10,6 +10,7 @@ CPP_VERSION = c++20
 
 # LIBS
 LIBS = 
+LIB_NAME = libmlc
 
 # DIRECTORIES
 SRC_DIR = src
@@ -18,7 +19,7 @@ UNIT_TESTS_DIR = $(TEST_DIR)/unit
 INT_TESTS_DIR = $(TEST_DIR)/integration
 BIN_DIR_ROOT = build
 KERNELS_DIR = $(BIN_DIR_ROOT)/kernels
-LIB_DIR = 
+LIB_DIR = lib
 INC_DIR = include
 SUB_DIR = $(SRC_DIR)/submissions
 
@@ -76,6 +77,12 @@ LD = $(LLVM_LOCATION)/bin/clang++
 endif
 endif
 
+# SET AR ON MAC THAT IS NOT INSTALLED BY HOMEBREW
+AR := ar
+ifeq ($(OS),macOS)
+	AR := $(shell xcrun --find ar)
+endif
+
 # OS-SPECIFIC DIRECTORIES
 BIN_DIR := $(BIN_DIR_ROOT)/$(OS)
 ifeq ($(OS),windows)
@@ -105,6 +112,7 @@ ifeq ($(OS),macOS)
 	CXXFLAGS += -I$(LIBOMP_LOCATION)/include
 	LDFLAGS += -L$(LIBOMP_LOCATION)/lib
 	LDFLAGS += -lomp
+	LDFLAGS += -Wl,-rpath,$(LIBOMP_LOCATION)/lib
 endif
 
 CXXFLAGS += -fopenmp
@@ -115,18 +123,15 @@ LDFLAGS += -fopenmp
 INCFLAGS = -I$(INC_DIR)
 INCFLAGS += -I$(TEST_DIR)
 INCFLAGS += -I/usr/local/include
-ifeq ($(OS),windows)
-	INCFLAGS += $(shell C:\\msys64\\usr\\bin\\find.exe -L $(SRC_DIR) -type d -path "$(SUB_DIR)" -prune -o -type d -exec echo -I{} \;)
-else ifeq ($(OS),macOS)
-	INCFLAGS += $(shell find $(SRC_DIR) -path "$(SUB_DIR)" -prune -o -type d -exec echo -I{} \;)
+ifeq ($(OS),macOS)
 	ifeq ($(ARCH),arm64)
 		INCFLAGS += -I/opt/homebrew/include
 	else ifeq ($(ARCH),x86_64)
 		INCFLAGS += -I/usr/local/include
 	endif
-else ifeq ($(OS),linux)
-	INCFLAGS += $(shell find $(SRC_DIR) -path "$(SUB_DIR)" -prune -o -type d -exec echo -I{} \;)
 endif
+# Windows and Linux might need additional includes
+# But for now, we assume the standard locations are sufficient
 
 # LINKER LIBRARIES
 ifeq ($(OS),macOS)
@@ -189,7 +194,7 @@ BENCH_MAIN_OBJ = $(BENCH_MAIN_SRC:%.cpp=$(BIN_DIR)/%.o)
 BENCH_OBJ = $(BENCH_SRC:%.cpp=$(BIN_DIR)/%.o)
 
 # TARGETS
-default: tests benchmarks
+default: static-library unit-tests
 
 $(BIN_DIR):
 	mkdir -p $@
@@ -199,6 +204,18 @@ createdirs: $(BIN_DIR)
 $(BIN_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -o $@ -MMD -c $< $(CXXFLAGS) $(INCFLAGS)
+
+static-library: $(LIB_DIR)/$(LIB_NAME).a
+shared-library: $(LIB_DIR)/$(LIB_NAME).so
+
+$(LIB_DIR):
+	mkdir -p $@
+
+$(LIB_DIR)/$(LIB_NAME).a: $(COMMON_OBJ) | $(LIB_DIR)
+	$(AR) rcs $@ $^
+
+$(LIB_DIR)/$(LIB_NAME).so: $(COMMON_OBJ) | $(LIB_DIR)
+	$(CXX) -shared -o $@ $^ $(LDFLAGS)
 
 benchmarks: createdirs $(COMMON_OBJ) $(BENCH_MAIN_OBJ) $(BENCH_OBJ)
 	$(LD) -o $(BIN_DIR)/benchmarks $(COMMON_OBJ) $(BENCH_MAIN_OBJ) $(BENCH_OBJ) $(LDFLAGS) $(LIBS)
@@ -226,5 +243,6 @@ tests-san: unit-tests-san int-tests-san
 .PHONY: clean
 
 clean:
+	rm -rf $(LIB_DIR)
 	rm -rf $(BIN_DIR)
 	rm -rf $(KERNELS_DIR)
