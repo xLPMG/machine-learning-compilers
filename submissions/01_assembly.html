@@ -1,0 +1,612 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1. Assembly &mdash; Machine Learning Compilers  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2. Base" href="02_base.html" />
+    <link rel="prev" title="Documentation Setup" href="../project_overview/04_docu_setup.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Machine Learning Compilers
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Project Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../project_overview/01_project_information.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project_overview/02_project_report.html">Project Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project_overview/03_user_guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project_overview/04_docu_setup.html">Documentation Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Submissions</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">1. Assembly</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#hello-assembly">1.1 Hello Assembly</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#task-1-1-1">Task 1.1.1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#task-1-1-2">Task 1.1.2</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#task-1-1-2-1-gcc">Task 1.1.2.1 GCC</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#task-1-1-2-2-clang">Task 1.1.2.2 Clang</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#task-1-1-3">Task 1.1.3</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#assembly-function">1.2 Assembly Function</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#task-1-2-1">Task 1.2.1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#task-1-2-2">Task 1.2.2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#task-1-2-3">Task 1.2.3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#task-1-2-4">Task 1.2.4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#task-1-2-5">Task 1.2.5</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="02_base.html">2. Base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_neon.html">3. Neon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_code_gen.html">4. Code Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_tensor_op.html">5. Tensor Operation Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_einsum.html">6. Einsum Trees</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_individual_phase.html">7. Individual Phase</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/namespaces/mini_jit.html">mini_jit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/namespaces/mini_jit_benchmarks.html">mini_jit::benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/namespaces/mini_jit_converters.html">mini_jit::converters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/namespaces/mini_jit_einsum.html">mini_jit::einsum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/namespaces/mini_jit_instructions.html">mini_jit::instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/namespaces/mini_jit_ir.html">mini_jit::ir</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/namespaces/mini_jit_kernels.html">mini_jit::kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/namespaces/mini_jit_registers.html">mini_jit::registers</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Machine Learning Compilers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">1. Assembly</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/submissions/01_assembly.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="assembly">
+<span id="id1"></span><h1>1. Assembly<a class="headerlink" href="#assembly" title="Link to this heading"></a></h1>
+<p>To begin the machine learning compilers project, we explored the fundamentals of the assembly language and compiler behavior to establish a fundamental understanding.</p>
+<section id="hello-assembly">
+<h2>1.1 Hello Assembly<a class="headerlink" href="#hello-assembly" title="Link to this heading"></a></h2>
+<p>We started with a simple C program:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text"><a class="reference external" href="https://github.com/Shad00Z/machine-learning-compilers/blob/main/src/submissions/01_assembly/data/hello_assembly.c">hello_assembly.c</a></span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">hello_assembly</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;Hello Assembly Language!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>Our goal was to compile this program using both <code class="docutils literal notranslate"><span class="pre">GCC</span></code> and <code class="docutils literal notranslate"><span class="pre">Clang</span></code> and analyze the differences in the generated assembly code to understand how compiler implementations can vary at the machine level.</p>
+<section id="task-1-1-1">
+<h3>Task 1.1.1<a class="headerlink" href="#task-1-1-1" title="Link to this heading"></a></h3>
+<p>To generate assembly code from the <code class="code docutils literal notranslate"><span class="pre">hello_assembly.c</span></code> program using both compilers, we first identified the appropriate commands:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">GCC</span></code> compiler</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gcc<span class="w"> </span>-S<span class="w"> </span>hello_assembly.c
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">Clang</span></code> compiler</span><a class="headerlink" href="#id4" title="Link to this code"></a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>clang<span class="w"> </span>-S<span class="w"> </span>hello_assembly.c
+</pre></div>
+</div>
+</div>
+</section>
+<section id="task-1-1-2">
+<h3>Task 1.1.2<a class="headerlink" href="#task-1-1-2" title="Link to this heading"></a></h3>
+<p>After compiling the C program, we analyzed the generated assembly code by:</p>
+<ol class="arabic simple">
+<li><p>Locating the “Hello Assembly Language!” string.</p></li>
+<li><p>Identifying the instructions inserted by the compiler insert to conform to the procedure call standard (PCS).</p></li>
+<li><p>Identifying the function call to the C standard library (libc) that prints the string.</p></li>
+</ol>
+<section id="task-1-1-2-1-gcc">
+<h4>Task 1.1.2.1 GCC<a class="headerlink" href="#task-1-1-2-1-gcc" title="Link to this heading"></a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">GCC</span></code>-generated file:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text"><a class="reference external" href="https://github.com/Shad00Z/machine-learning-compilers/blob/main/src/submissions/01_assembly/01_task/gcc_hello_assembly.s">gcc_hello_assembly.s</a></span><a class="headerlink" href="#id5" title="Link to this code"></a></div>
+<div class="highlight-asm notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w">	</span><span class="na">.arch</span><span class="w"> </span><span class="no">armv8-a</span>
+<span class="linenos"> 2</span><span class="w">	</span><span class="na">.file</span><span class="w">	</span><span class="s">&quot;hello_assembly.c&quot;</span>
+<span class="linenos"> 3</span><span class="w">	</span><span class="na">.text</span>
+<span class="linenos"> 4</span><span class="w">	</span><span class="na">.section</span><span class="w">	</span><span class="no">.rodata</span>
+<span class="linenos"> 5</span><span class="w">	</span><span class="na">.align</span><span class="w">	</span><span class="mi">3</span>
+<span class="linenos"> 6</span><span class="nl">.LC0:</span>
+<span class="linenos"> 7</span><span class="w">	</span><span class="na">.string</span><span class="w">	</span><span class="s">&quot;Hello Assembly Language!&quot;</span>
+<span class="linenos"> 8</span><span class="w">	</span><span class="na">.text</span>
+<span class="linenos"> 9</span><span class="w">	</span><span class="na">.align</span><span class="w">	</span><span class="mi">2</span>
+<span class="linenos">10</span><span class="w">	</span><span class="na">.global</span><span class="w">	</span><span class="no">hello_assembly</span>
+<span class="linenos">11</span><span class="w">	</span><span class="na">.type</span><span class="w">	</span><span class="no">hello_assembly</span><span class="p">,</span><span class="w"> </span><span class="nv">%function</span>
+<span class="linenos">12</span><span class="nl">hello_assembly:</span>
+<span class="linenos">13</span><span class="nl">.LFB0:</span>
+<span class="linenos">14</span><span class="w">	</span><span class="na">.cfi_startproc</span>
+<span class="linenos">15</span><span class="w">	</span><span class="nf">stp</span><span class="w">	</span><span class="no">x29</span><span class="p">,</span><span class="w"> </span><span class="no">x30</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">-16</span><span class="p">]!</span>
+<span class="linenos">16</span><span class="w">	</span><span class="na">.cfi_def_cfa_offset</span><span class="w"> </span><span class="mi">16</span>
+<span class="linenos">17</span><span class="w">	</span><span class="na">.cfi_offset</span><span class="w"> </span><span class="mi">29</span><span class="p">,</span><span class="w"> </span><span class="mi">-16</span>
+<span class="linenos">18</span><span class="w">	</span><span class="na">.cfi_offset</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w"> </span><span class="mi">-8</span>
+<span class="linenos">19</span><span class="w">	</span><span class="nf">mov</span><span class="w">	</span><span class="no">x29</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span>
+<span class="linenos">20</span><span class="w">	</span><span class="nf">adrp</span><span class="w">	</span><span class="no">x0</span><span class="p">,</span><span class="w"> </span><span class="no">.LC0</span>
+<span class="linenos">21</span><span class="w">	</span><span class="nf">add</span><span class="w">	</span><span class="no">x0</span><span class="p">,</span><span class="w"> </span><span class="no">x0</span><span class="p">,</span><span class="w"> </span><span class="p">:</span><span class="no">lo12</span><span class="p">:.</span><span class="no">LC0</span>
+<span class="linenos">22</span><span class="w">	</span><span class="nf">bl</span><span class="w">	</span><span class="no">puts</span>
+<span class="linenos">23</span><span class="w">	</span><span class="nf">nop</span>
+<span class="linenos">24</span><span class="w">	</span><span class="nf">ldp</span><span class="w">	</span><span class="no">x29</span><span class="p">,</span><span class="w"> </span><span class="no">x30</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">],</span><span class="w"> </span><span class="mi">16</span>
+<span class="linenos">25</span><span class="w">	</span><span class="na">.cfi_restore</span><span class="w"> </span><span class="mi">30</span>
+<span class="linenos">26</span><span class="w">	</span><span class="na">.cfi_restore</span><span class="w"> </span><span class="mi">29</span>
+<span class="linenos">27</span><span class="w">	</span><span class="na">.cfi_def_cfa_offset</span><span class="w"> </span><span class="mi">0</span>
+<span class="linenos">28</span><span class="w">	</span><span class="nf">ret</span>
+<span class="linenos">29</span><span class="w">	</span><span class="na">.cfi_endproc</span>
+<span class="linenos">30</span><span class="nl">.LFE0:</span>
+<span class="linenos">31</span><span class="w">	</span><span class="na">.size</span><span class="w">	</span><span class="no">hello_assembly</span><span class="p">,</span><span class="w"> </span><span class="no">.-hello_assembly</span>
+<span class="linenos">32</span><span class="w">	</span><span class="na">.ident</span><span class="w">	</span><span class="s">&quot;GCC: (GNU) 14.2.1 20250110 (Red Hat 14.2.1-7)&quot;</span>
+<span class="linenos">33</span><span class="w">	</span><span class="na">.section</span><span class="w">	</span><span class="no">.note.GNU-stack</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="na">@progbits</span>
+</pre></div>
+</div>
+</div>
+<ol class="arabic simple">
+<li><p>The string “Hello Assembly Language!” appears at <strong>line 7</strong>.</p></li>
+<li><p>The instructions for the procedure call standard are:</p></li>
+</ol>
+<div class="highlight-asm notranslate"><div class="highlight"><pre><span></span><span class="nf">stp</span><span class="w"> </span><span class="no">x29</span><span class="p">,</span><span class="w"> </span><span class="no">x30</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">-16</span><span class="p">]!</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">x29</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span>
+
+<span class="na">...</span>
+
+<span class="nf">ldp</span><span class="w"> </span><span class="no">x29</span><span class="p">,</span><span class="w"> </span><span class="no">x30</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">],</span><span class="w"> </span><span class="mi">16</span>
+<span class="nf">ret</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>The function call used to print the string is:</p></li>
+</ol>
+<div class="highlight-asm notranslate"><div class="highlight"><pre><span></span><span class="nf">bl</span><span class="w">  </span><span class="no">puts</span>
+</pre></div>
+</div>
+</section>
+<section id="task-1-1-2-2-clang">
+<h4>Task 1.1.2.2 Clang<a class="headerlink" href="#task-1-1-2-2-clang" title="Link to this heading"></a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">Clang</span></code>-generated file:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text"><a class="reference external" href="https://github.com/Shad00Z/machine-learning-compilers/blob/main/src/submissions/01_assembly/01_task/clang_hello_assembly.s">clang_hello_assembly.s</a></span><a class="headerlink" href="#id6" title="Link to this code"></a></div>
+<div class="highlight-asm notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w">	</span><span class="na">.text</span>
+<span class="linenos"> 2</span><span class="w">	</span><span class="na">.file</span><span class="w">	</span><span class="s">&quot;hello_assembly.c&quot;</span>
+<span class="linenos"> 3</span><span class="w">	</span><span class="na">.globl</span><span class="w">	</span><span class="no">hello_assembly</span><span class="w">                  </span><span class="c1">// -- Begin function hello_assembly</span>
+<span class="linenos"> 4</span><span class="w">	</span><span class="na">.p2align</span><span class="w">	</span><span class="mi">2</span>
+<span class="linenos"> 5</span><span class="w">	</span><span class="na">.type</span><span class="w">	</span><span class="no">hello_assembly</span><span class="p">,</span><span class="na">@function</span>
+<span class="linenos"> 6</span><span class="nl">hello_assembly:</span><span class="w">                         </span><span class="c1">// @hello_assembly</span>
+<span class="linenos"> 7</span><span class="w">	</span><span class="na">.cfi_startproc</span>
+<span class="linenos"> 8</span><span class="c1">// %bb.0:</span>
+<span class="linenos"> 9</span><span class="w">	</span><span class="nf">stp</span><span class="w">	</span><span class="no">x29</span><span class="p">,</span><span class="w"> </span><span class="no">x30</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#-16</span><span class="p">]!</span><span class="w">           </span><span class="c1">// 16-byte Folded Spill</span>
+<span class="linenos">10</span><span class="w">	</span><span class="na">.cfi_def_cfa_offset</span><span class="w"> </span><span class="mi">16</span>
+<span class="linenos">11</span><span class="w">	</span><span class="nf">mov</span><span class="w">	</span><span class="no">x29</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span>
+<span class="linenos">12</span><span class="w">	</span><span class="na">.cfi_def_cfa</span><span class="w"> </span><span class="no">w29</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span>
+<span class="linenos">13</span><span class="w">	</span><span class="na">.cfi_offset</span><span class="w"> </span><span class="no">w30</span><span class="p">,</span><span class="w"> </span><span class="mi">-8</span>
+<span class="linenos">14</span><span class="w">	</span><span class="na">.cfi_offset</span><span class="w"> </span><span class="no">w29</span><span class="p">,</span><span class="w"> </span><span class="mi">-16</span>
+<span class="linenos">15</span><span class="w">	</span><span class="nf">adrp</span><span class="w">	</span><span class="no">x0</span><span class="p">,</span><span class="w"> </span><span class="no">.L.str</span>
+<span class="linenos">16</span><span class="w">	</span><span class="nf">add</span><span class="w">	</span><span class="no">x0</span><span class="p">,</span><span class="w"> </span><span class="no">x0</span><span class="p">,</span><span class="w"> </span><span class="p">:</span><span class="no">lo12</span><span class="p">:.</span><span class="no">L.str</span>
+<span class="linenos">17</span><span class="w">	</span><span class="nf">bl</span><span class="w">	</span><span class="no">printf</span>
+<span class="linenos">18</span><span class="w">	</span><span class="na">.cfi_def_cfa</span><span class="w"> </span><span class="no">wsp</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span>
+<span class="linenos">19</span><span class="w">	</span><span class="nf">ldp</span><span class="w">	</span><span class="no">x29</span><span class="p">,</span><span class="w"> </span><span class="no">x30</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">],</span><span class="w"> </span><span class="mi">#16</span><span class="w">             </span><span class="c1">// 16-byte Folded Reload</span>
+<span class="linenos">20</span><span class="w">	</span><span class="na">.cfi_def_cfa_offset</span><span class="w"> </span><span class="mi">0</span>
+<span class="linenos">21</span><span class="w">	</span><span class="na">.cfi_restore</span><span class="w"> </span><span class="no">w30</span>
+<span class="linenos">22</span><span class="w">	</span><span class="na">.cfi_restore</span><span class="w"> </span><span class="no">w29</span>
+<span class="linenos">23</span><span class="w">	</span><span class="nf">ret</span>
+<span class="linenos">24</span><span class="nl">.Lfunc_end0:</span>
+<span class="linenos">25</span><span class="w">	</span><span class="na">.size</span><span class="w">	</span><span class="no">hello_assembly</span><span class="p">,</span><span class="w"> </span><span class="no">.Lfunc_end0-hello_assembly</span>
+<span class="linenos">26</span><span class="w">	</span><span class="na">.cfi_endproc</span>
+<span class="linenos">27</span><span class="w">                                        </span><span class="c1">// -- End function</span>
+<span class="linenos">28</span><span class="w">	</span><span class="na">.type</span><span class="w">	</span><span class="no">.L.str</span><span class="p">,</span><span class="na">@object</span><span class="w">                  </span><span class="c1">// @.str</span>
+<span class="linenos">29</span><span class="w">	</span><span class="na">.section</span><span class="w">	</span><span class="no">.rodata.str1.1</span><span class="p">,</span><span class="s">&quot;aMS&quot;</span><span class="p">,</span><span class="na">@progbits</span><span class="p">,</span><span class="mi">1</span>
+<span class="linenos">30</span><span class="nl">.L.str:</span>
+<span class="linenos">31</span><span class="w">	</span><span class="na">.asciz</span><span class="w">	</span><span class="s">&quot;Hello Assembly Language!\n&quot;</span>
+<span class="linenos">32</span><span class="w">	</span><span class="na">.size</span><span class="w">	</span><span class="no">.L.str</span><span class="p">,</span><span class="w"> </span><span class="mi">26</span>
+<span class="linenos">33</span>
+<span class="linenos">34</span><span class="w">	</span><span class="na">.ident</span><span class="w">	</span><span class="s">&quot;clang version 19.1.7 (Fedora 19.1.7-3.fc41)&quot;</span>
+<span class="linenos">35</span><span class="w">	</span><span class="na">.section</span><span class="w">	</span><span class="s">&quot;.note.GNU-stack&quot;</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="na">@progbits</span>
+<span class="linenos">36</span><span class="w">	</span><span class="na">.addrsig</span>
+<span class="linenos">37</span><span class="w">	</span><span class="na">.addrsig_sym</span><span class="w"> </span><span class="no">printf</span>
+</pre></div>
+</div>
+</div>
+<ol class="arabic simple">
+<li><p>The string “Hello Assembly Language!” appears at <strong>line 31</strong>.</p></li>
+<li><p>The instructions for the procedure call standard are:</p></li>
+</ol>
+<div class="highlight-asm notranslate"><div class="highlight"><pre><span></span><span class="nf">stp</span><span class="w"> </span><span class="no">x29</span><span class="p">,</span><span class="w"> </span><span class="no">x30</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">-16</span><span class="p">]!</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">x29</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span>
+
+<span class="na">...</span>
+
+<span class="nf">ldp</span><span class="w"> </span><span class="no">x29</span><span class="p">,</span><span class="w"> </span><span class="no">x30</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">],</span><span class="w"> </span><span class="mi">16</span>
+<span class="nf">ret</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>The function call used to print the string is:</p></li>
+</ol>
+<div class="highlight-asm notranslate"><div class="highlight"><pre><span></span><span class="nf">bl</span><span class="w">  </span><span class="no">printf</span>
+</pre></div>
+</div>
+<p>This analysis illustrates that while both compilers conform to the same calling standard, they differ in aspects, such as the string placement and the choice of standard library function used for the output.</p>
+</section>
+</section>
+<section id="task-1-1-3">
+<h3>Task 1.1.3<a class="headerlink" href="#task-1-1-3" title="Link to this heading"></a></h3>
+<p>After analyzing the generated assembly code, we implemented a simple C++ driver that calls the <code class="docutils literal notranslate"><span class="pre">hello_assembly</span></code> function:</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text"><a class="reference external" href="https://github.com/Shad00Z/machine-learning-compilers/blob/main/src/submissions/01_assembly/01_task/driver_hello_assembly.cpp">driver_hello_assembly.cpp</a></span><a class="headerlink" href="#id7" title="Link to this code"></a></div>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="k">extern</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">hello_assembly</span><span class="p">();</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span>
+<span class="linenos"> 6</span><span class="p">{</span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Calling hello_assembly ...</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+<span class="linenos"> 8</span><span class="w">    </span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="c1">// Call to hello_assembly</span>
+<span class="linenos">10</span><span class="w">    </span><span class="n">hello_assembly</span><span class="p">();</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;... returned from function call!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+<span class="linenos">13</span><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="linenos">14</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>To compile the driver along with the <code class="docutils literal notranslate"><span class="pre">GCC</span></code>-generated assembly code and execute the program, we used the following commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>g++<span class="w"> </span>driver_hello_assembly.cpp<span class="w"> </span>gcc_hello_assembly.s<span class="w"> </span>-o<span class="w"> </span>hello_assembly
+./hello_assembly
+</pre></div>
+</div>
+<p>The output of the program:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Calling<span class="w"> </span>hello_assembly<span class="w"> </span>...
+Hello<span class="w"> </span>Assembly<span class="w"> </span>Language!
+...<span class="w"> </span>returned<span class="w"> </span>from<span class="w"> </span><span class="k">function</span><span class="w"> </span>call!
+</pre></div>
+</div>
+</section>
+</section>
+<section id="assembly-function">
+<h2>1.2 Assembly Function<a class="headerlink" href="#assembly-function" title="Link to this heading"></a></h2>
+<p>Next, we worked with the <code class="code docutils literal notranslate"><span class="pre">add_values.s</span></code> file.</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text"><a class="reference external" href="https://github.com/Shad00Z/machine-learning-compilers/blob/main/src/submissions/01_assembly/data/add_values.s">add_values.s</a></span><a class="headerlink" href="#id8" title="Link to this code"></a></div>
+<div class="highlight-asm notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="na">.text</span>
+<span class="w">    </span><span class="na">.type</span><span class="w"> </span><span class="no">add_values</span><span class="p">,</span><span class="w"> </span><span class="nv">%function</span>
+<span class="w">    </span><span class="na">.global</span><span class="w"> </span><span class="no">add_values</span>
+<span class="nl">add_values:</span>
+<span class="w">    </span><span class="nf">stp</span><span class="w"> </span><span class="no">fp</span><span class="p">,</span><span class="w"> </span><span class="no">lr</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">,</span><span class="w"> </span><span class="mi">#-16</span><span class="p">]!</span>
+<span class="w">    </span><span class="nf">mov</span><span class="w"> </span><span class="no">fp</span><span class="p">,</span><span class="w"> </span><span class="no">sp</span>
+
+<span class="w">    </span><span class="nf">ldr</span><span class="w"> </span><span class="no">w3</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">x0</span><span class="p">]</span>
+<span class="w">    </span><span class="nf">ldr</span><span class="w"> </span><span class="no">w4</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">x1</span><span class="p">]</span>
+<span class="w">    </span><span class="nf">add</span><span class="w"> </span><span class="no">w5</span><span class="p">,</span><span class="w"> </span><span class="no">w3</span><span class="p">,</span><span class="w"> </span><span class="no">w4</span>
+<span class="w">    </span><span class="nf">str</span><span class="w"> </span><span class="no">w5</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">x2</span><span class="p">]</span>
+
+<span class="w">    </span><span class="nf">ldp</span><span class="w"> </span><span class="no">fp</span><span class="p">,</span><span class="w"> </span><span class="no">lr</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">sp</span><span class="p">],</span><span class="w"> </span><span class="mi">#16</span>
+
+<span class="w">    </span><span class="nf">ret</span>
+</pre></div>
+</div>
+</div>
+<section id="task-1-2-1">
+<h3>Task 1.2.1<a class="headerlink" href="#task-1-2-1" title="Link to this heading"></a></h3>
+<p>As a first step, we assembled the file into an object file using:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>as<span class="w"> </span>add_values.s<span class="w"> </span>-o<span class="w"> </span>add_values.o
+</pre></div>
+</div>
+</section>
+<section id="task-1-2-2">
+<h3>Task 1.2.2<a class="headerlink" href="#task-1-2-2" title="Link to this heading"></a></h3>
+<p>With the <code class="code docutils literal notranslate"><span class="pre">add_values.o</span></code>, we performed different file generations to understand its structure:</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">Generating a hexadecimal dump</span><a class="headerlink" href="#id9" title="Link to this code"></a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hexdump<span class="w"> </span>add_values.o<span class="w"> </span>&gt;<span class="w"> </span>hexdump_add_values.hex
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text"><a class="reference external" href="https://github.com/Shad00Z/machine-learning-compilers/blob/main/src/submissions/01_assembly/02_task/hexdump_add_values.hex">hexdump_add_values.hex</a></span><a class="headerlink" href="#id10" title="Link to this code"></a></div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>0000000 457f 464c 0102 0001 0000 0000 0000 0000
+<span class="linenos"> 2</span>0000010 0001 00b7 0001 0000 0000 0000 0000 0000
+<span class="linenos"> 3</span>0000020 0000 0000 0000 0000 0130 0000 0000 0000
+<span class="linenos"> 4</span>0000030 0000 0000 0040 0000 0000 0040 0007 0006
+<span class="linenos"> 5</span>0000040 7bfd a9bf 03fd 9100 0003 b940 0024 b940
+<span class="linenos"> 6</span>0000050 0065 0b04 0045 b900 7bfd a8c1 03c0 d65f
+<span class="linenos"> 7</span>0000060 0000 0000 0000 0000 0000 0000 0000 0000
+<span class="linenos"> 8</span>0000070 0000 0000 0000 0000 0000 0000 0003 0001
+<span class="linenos"> 9</span>0000080 0000 0000 0000 0000 0000 0000 0000 0000
+<span class="linenos">10</span>0000090 0000 0000 0003 0002 0000 0000 0000 0000
+<span class="linenos">11</span>00000a0 0000 0000 0000 0000 0000 0000 0003 0003
+<span class="linenos">12</span>00000b0 0000 0000 0000 0000 0000 0000 0000 0000
+<span class="linenos">13</span>00000c0 0001 0000 0000 0001 0000 0000 0000 0000
+<span class="linenos">14</span>00000d0 0000 0000 0000 0000 0004 0000 0012 0001
+<span class="linenos">15</span>00000e0 0000 0000 0000 0000 0000 0000 0000 0000
+<span class="linenos">16</span>00000f0 2400 0078 6461 5f64 6176 756c 7365 0000
+<span class="linenos">17</span>0000100 732e 6d79 6174 0062 732e 7274 6174 0062
+<span class="linenos">18</span>0000110 732e 7368 7274 6174 0062 742e 7865 0074
+<span class="linenos">19</span>0000120 642e 7461 0061 622e 7373 0000 0000 0000
+<span class="linenos">20</span>0000130 0000 0000 0000 0000 0000 0000 0000 0000
+<span class="linenos">21</span>*
+<span class="linenos">22</span>0000170 001b 0000 0001 0000 0006 0000 0000 0000
+<span class="linenos">23</span>0000180 0000 0000 0000 0000 0040 0000 0000 0000
+<span class="linenos">24</span>0000190 0020 0000 0000 0000 0000 0000 0000 0000
+<span class="linenos">25</span>00001a0 0004 0000 0000 0000 0000 0000 0000 0000
+<span class="linenos">26</span>00001b0 0021 0000 0001 0000 0003 0000 0000 0000
+<span class="linenos">27</span>00001c0 0000 0000 0000 0000 0060 0000 0000 0000
+<span class="linenos">28</span>00001d0 0000 0000 0000 0000 0000 0000 0000 0000
+<span class="linenos">29</span>00001e0 0001 0000 0000 0000 0000 0000 0000 0000
+<span class="linenos">30</span>00001f0 0027 0000 0008 0000 0003 0000 0000 0000
+<span class="linenos">31</span>0000200 0000 0000 0000 0000 0060 0000 0000 0000
+<span class="linenos">32</span>0000210 0000 0000 0000 0000 0000 0000 0000 0000
+<span class="linenos">33</span>0000220 0001 0000 0000 0000 0000 0000 0000 0000
+<span class="linenos">34</span>0000230 0001 0000 0002 0000 0000 0000 0000 0000
+<span class="linenos">35</span>0000240 0000 0000 0000 0000 0060 0000 0000 0000
+<span class="linenos">36</span>0000250 0090 0000 0000 0000 0005 0000 0005 0000
+<span class="linenos">37</span>0000260 0008 0000 0000 0000 0018 0000 0000 0000
+<span class="linenos">38</span>0000270 0009 0000 0003 0000 0000 0000 0000 0000
+<span class="linenos">39</span>0000280 0000 0000 0000 0000 00f0 0000 0000 0000
+<span class="linenos">40</span>0000290 000f 0000 0000 0000 0000 0000 0000 0000
+<span class="linenos">41</span>00002a0 0001 0000 0000 0000 0000 0000 0000 0000
+<span class="linenos">42</span>00002b0 0011 0000 0003 0000 0000 0000 0000 0000
+<span class="linenos">43</span>00002c0 0000 0000 0000 0000 00ff 0000 0000 0000
+<span class="linenos">44</span>00002d0 002c 0000 0000 0000 0000 0000 0000 0000
+<span class="linenos">45</span>00002e0 0001 0000 0000 0000 0000 0000 0000 0000
+<span class="linenos">46</span>00002f0
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">Generating section headers</span><a class="headerlink" href="#id11" title="Link to this code"></a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>readelf<span class="w"> </span>-S<span class="w"> </span>add_values.o<span class="w"> </span>&gt;<span class="w"> </span>sec_headers_add_values.relf
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text"><a class="reference external" href="https://github.com/Shad00Z/machine-learning-compilers/blob/main/src/submissions/01_assembly/02_task/sec_headers_add_values.relf">sec_headers_add_values.relf</a></span><a class="headerlink" href="#id12" title="Link to this code"></a></div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>There are 7 section headers, starting at offset 0x130:
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span>Section Headers:
+<span class="linenos"> 4</span>  [Nr] Name              Type             Address           Offset
+<span class="linenos"> 5</span>       Size              EntSize          Flags  Link  Info  Align
+<span class="linenos"> 6</span>  [ 0]                   NULL             0000000000000000  00000000
+<span class="linenos"> 7</span>       0000000000000000  0000000000000000           0     0     0
+<span class="linenos"> 8</span>  [ 1] .text             PROGBITS         0000000000000000  00000040
+<span class="linenos"> 9</span>       0000000000000020  0000000000000000  AX       0     0     4
+<span class="linenos">10</span>  [ 2] .data             PROGBITS         0000000000000000  00000060
+<span class="linenos">11</span>       0000000000000000  0000000000000000  WA       0     0     1
+<span class="linenos">12</span>  [ 3] .bss              NOBITS           0000000000000000  00000060
+<span class="linenos">13</span>       0000000000000000  0000000000000000  WA       0     0     1
+<span class="linenos">14</span>  [ 4] .symtab           SYMTAB           0000000000000000  00000060
+<span class="linenos">15</span>       0000000000000090  0000000000000018           5     5     8
+<span class="linenos">16</span>  [ 5] .strtab           STRTAB           0000000000000000  000000f0
+<span class="linenos">17</span>       000000000000000f  0000000000000000           0     0     1
+<span class="linenos">18</span>  [ 6] .shstrtab         STRTAB           0000000000000000  000000ff
+<span class="linenos">19</span>       000000000000002c  0000000000000000           0     0     1
+<span class="linenos">20</span>Key to Flags:
+<span class="linenos">21</span>  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+<span class="linenos">22</span>  L (link order), O (extra OS processing required), G (group), T (TLS),
+<span class="linenos">23</span>  C (compressed), x (unknown), o (OS specific), E (exclude),
+<span class="linenos">24</span>  D (mbind), p (processor specific)
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">Generating disassembled file</span><a class="headerlink" href="#id13" title="Link to this code"></a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>objdump<span class="w"> </span>--syms<span class="w"> </span>-S<span class="w"> </span>-d<span class="w"> </span>add_values.o<span class="w"> </span>&gt;<span class="w"> </span>dis_add_values.dis
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text"><a class="reference external" href="https://github.com/Shad00Z/machine-learning-compilers/blob/main/src/submissions/01_assembly/02_task/dis_add_values.dis">dis_add_values.dis</a></span><a class="headerlink" href="#id14" title="Link to this code"></a></div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>
+<span class="linenos"> 2</span>add_values.o:     file format elf64-littleaarch64
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span>SYMBOL TABLE:
+<span class="linenos"> 5</span>0000000000000000 l    d  .text	0000000000000000 .text
+<span class="linenos"> 6</span>0000000000000000 l    d  .data	0000000000000000 .data
+<span class="linenos"> 7</span>0000000000000000 l    d  .bss	0000000000000000 .bss
+<span class="linenos"> 8</span>0000000000000000 g     F .text	0000000000000000 add_values
+<span class="linenos"> 9</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span>Disassembly of section .text:
+<span class="linenos">13</span>
+<span class="linenos">14</span>0000000000000000 &lt;add_values&gt;:
+<span class="linenos">15</span>   0:	a9bf7bfd 	stp	x29, x30, [sp, #-16]!
+<span class="linenos">16</span>   4:	910003fd 	mov	x29, sp
+<span class="linenos">17</span>   8:	b9400003 	ldr	w3, [x0]
+<span class="linenos">18</span>   c:	b9400024 	ldr	w4, [x1]
+<span class="linenos">19</span>  10:	0b040065 	add	w5, w3, w4
+<span class="linenos">20</span>  14:	b9000045 	str	w5, [x2]
+<span class="linenos">21</span>  18:	a8c17bfd 	ldp	x29, x30, [sp], #16
+<span class="linenos">22</span>  1c:	d65f03c0 	ret
+</pre></div>
+</div>
+</div>
+</section>
+<section id="task-1-2-3">
+<h3>Task 1.2.3<a class="headerlink" href="#task-1-2-3" title="Link to this heading"></a></h3>
+<p>The next step was to determine the <strong>size</strong> of the <code class="code docutils literal notranslate"><span class="pre">.text</span></code> section and understand its content. This information is available in the section headers file in <em>line 9</em>:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>  [ 1] .text             PROGBITS         0000000000000000  00000040
+       0000000000000020  0000000000000000  AX       0     0     4
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">.text</span></code> section has a size of <code class="code docutils literal notranslate"><span class="pre">0000000000000020</span></code> or <code class="code docutils literal notranslate"><span class="pre">0x20</span></code> bytes, which corresponds to 32 bytes in decimal. Since each AArch64 instruction is 4 bytes, the function <code class="docutils literal notranslate"><span class="pre">add_values</span></code> consists of exactly 8 instructions.</p>
+<p>We confirmed this observation by inspecting the disassembled output:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>   0:	a9bf7bfd 	stp	x29, x30, [sp, #-16]!
+   4:	910003fd 	mov	x29, sp
+   8:	b9400003 	ldr	w3, [x0]
+   c:	b9400024 	ldr	w4, [x1]
+  10:	0b040065 	add	w5, w3, w4
+  14:	b9000045 	str	w5, [x2]
+  18:	a8c17bfd 	ldp	x29, x30, [sp], #16
+  1c:	d65f03c0 	ret
+</pre></div>
+</div>
+<p>The instructions start at <code class="code docutils literal notranslate"><span class="pre">0x00</span></code> and proceed in 4-byte increments, ending at <code class="docutils literal notranslate"><span class="pre">0x1c</span></code> with the <code class="docutils literal notranslate"><span class="pre">ret</span></code> instruction. This confirms that our there are exactly 8 instructions present, that match the <code class="docutils literal notranslate"><span class="pre">.text</span></code> section size.</p>
+</section>
+<section id="task-1-2-4">
+<h3>Task 1.2.4<a class="headerlink" href="#task-1-2-4" title="Link to this heading"></a></h3>
+<p>Similar to the first task, we now tested the functionality of the <code class="code docutils literal notranslate"><span class="pre">add_values</span></code> function by implementing a C++ driver:</p>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text"><a class="reference external" href="https://github.com/Shad00Z/machine-learning-compilers/blob/main/src/submissions/01_assembly/02_task/driver_add_values.cpp">driver_add_values.cpp</a></span><a class="headerlink" href="#id15" title="Link to this code"></a></div>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="k">extern</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">add_values</span><span class="p">(</span>
+<span class="linenos"> 4</span><span class="w">    </span><span class="kt">int32_t</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">,</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="kt">int32_t</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">,</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="kt">int32_t</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">c</span><span class="w"> </span>
+<span class="linenos"> 7</span><span class="p">);</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span>
+<span class="linenos">10</span><span class="p">{</span>
+<span class="linenos">11</span><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Calling assembly &#39;add_value&#39; function...</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="w">    </span><span class="c1">// Test Data</span>
+<span class="linenos">14</span><span class="w">    </span><span class="kt">int32_t</span><span class="w"> </span><span class="n">l_value_1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
+<span class="linenos">15</span><span class="w">    </span><span class="kt">int32_t</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">l_ptr_1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">l_value_1</span><span class="p">;</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span><span class="w">    </span><span class="kt">int32_t</span><span class="w"> </span><span class="n">l_value_2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">7</span><span class="p">;</span>
+<span class="linenos">18</span><span class="w">    </span><span class="kt">int32_t</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">l_ptr_2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">l_value_2</span><span class="p">;</span>
+<span class="linenos">19</span>
+<span class="linenos">20</span><span class="w">    </span><span class="kt">int32_t</span><span class="w"> </span><span class="n">l_value_o</span><span class="p">;</span>
+<span class="linenos">21</span><span class="w">    </span><span class="kt">int32_t</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">l_ptr_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">l_value_o</span><span class="p">;</span>
+<span class="linenos">22</span>
+<span class="linenos">23</span><span class="w">    </span><span class="c1">// Call to add_values</span>
+<span class="linenos">24</span><span class="w">    </span><span class="n">add_values</span><span class="p">(</span><span class="w"> </span><span class="n">l_ptr_1</span><span class="p">,</span><span class="w"> </span><span class="n">l_ptr_2</span><span class="p">,</span><span class="w"> </span><span class="n">l_ptr_o</span><span class="w"> </span><span class="p">);</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;l_data_1 / l_value_2 / l_value_o</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="linenos">27</span><span class="w">        </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">l_value_1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; / &quot;</span>
+<span class="linenos">28</span><span class="w">        </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">l_value_2</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; / &quot;</span>
+<span class="linenos">29</span><span class="w">        </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">l_value_o</span>
+<span class="linenos">30</span><span class="w">        </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="linenos">33</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>We compiled and linked the driver with the assembly file using:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>g++<span class="w"> </span>driver_add_values.cpp<span class="w"> </span>add_values.s<span class="w"> </span>-o<span class="w"> </span>driver_add_values
+</pre></div>
+</div>
+<p>After executing these commands, we received the following results:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Calling<span class="w"> </span>assembly<span class="w"> </span><span class="s1">&#39;add_value&#39;</span><span class="w"> </span><span class="k">function</span><span class="w"> </span>...
+l_data_1<span class="w"> </span>/<span class="w"> </span>l_value_2<span class="w"> </span>/<span class="w"> </span>l_value_o
+<span class="m">4</span><span class="w"> </span>/<span class="w"> </span><span class="m">7</span><span class="w"> </span>/<span class="w"> </span><span class="m">11</span>
+</pre></div>
+</div>
+<p>This confirms that the <code class="docutils literal notranslate"><span class="pre">add_values</span></code> correctly adds the two input values together and stores the result at the specified memory location.</p>
+</section>
+<section id="task-1-2-5">
+<h3>Task 1.2.5<a class="headerlink" href="#task-1-2-5" title="Link to this heading"></a></h3>
+<p>To better understand the contents of the general purpose registers during a function call to <code class="docutils literal notranslate"><span class="pre">add_values</span></code>, we used the GNU Project Debugger (GDB) to step through the function execution.</p>
+<p>We launched GDB with the compiled executable:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gdb<span class="w"> </span>./driver_add_values
+lay<span class="w"> </span>next
+</pre></div>
+</div>
+<p>To activate the correct layout view that displays both the assembly instructions and register contents, we ran <code class="code docutils literal notranslate"><span class="pre">lay</span> <span class="pre">next</span></code>. After pressing <code class="docutils literal notranslate"><span class="pre">Enter</span></code>, GDB displayed the desired view.
+Next, we set a breakpoint at the <code class="docutils literal notranslate"><span class="pre">add_values</span></code> function and began the debugging process:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">break</span><span class="w"> </span>add_values
+run
+</pre></div>
+</div>
+<p>After starting the debugging process, we used <code class="docutils literal notranslate"><span class="pre">nexti</span></code> to step through each instruction one at a time:</p>
+<embed src="../_static/GDB_add_values.pdf" width="100%" height="600px" type="application/pdf"></section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../project_overview/04_docu_setup.html" class="btn btn-neutral float-left" title="Documentation Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="02_base.html" class="btn btn-neutral float-right" title="2. Base" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Lucas Obitz, Luca-Philipp Grumbach.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
