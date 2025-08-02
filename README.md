@@ -1,3 +1,3 @@
 # Machine Learning Compilers
 
-The current version of the documentation / report can be found under [this link](https://shad00z.github.io/machine-learning-compilers/).
+To learn more about this project, please refer to our [our documentation.](https://xlpmg.github.io/machine-learning-compilers/).
