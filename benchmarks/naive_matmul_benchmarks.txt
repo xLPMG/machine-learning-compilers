@@ -1,0 +1,12 @@
+Running NaiveMatmulMNKBench 2048x2048x2048 benchmark
+Total time (s):                       7.9635
+Total reps:                           1
+Total floating point operations:      17179869184
+Estimated GFLOPS/sec:                 2.15733
+--------------------------------------------------
+Running NaiveMatmulBrMNKBench 1024x1024x1024 br=16 benchmark
+Total time (s):                       45.542
+Total reps:                           1
+Total floating point operations:      34359738368
+Estimated GFLOPS/sec:                 0.754462
+--------------------------------------------------

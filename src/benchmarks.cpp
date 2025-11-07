@@ -621,6 +621,7 @@ int main(int argc, char* argv[])
     bool has_gemm                     = false;
     bool has_brgemm                   = false;
     bool has_matmul                   = false;
+    bool has_naive_matmul             = false;
     bool has_unary                    = false;
     bool has_tensor_operations        = false;
     bool has_shared_tensor_operations = false;
@@ -629,6 +630,7 @@ int main(int argc, char* argv[])
     bool has_opt_einsum_benchmark     = false;
     bool has_reciprocal               = false;
     bool has_sigmoid                  = false;
+    bool has_naive_sigmoid            = false;
     for (int i = 1; i < argc; ++i)
     {
         if (strcmp(argv[i], "gemm") == 0)
@@ -637,6 +639,8 @@ int main(int argc, char* argv[])
             has_brgemm = true;
         else if (strcmp(argv[i], "matmul") == 0)
             has_matmul = true;
+        else if (strcmp(argv[i], "naive-matmul") == 0)
+            has_naive_matmul = true;
         else if (strcmp(argv[i], "unary") == 0)
             has_unary = true;
         else if (strcmp(argv[i], "top") == 0)
@@ -653,6 +657,8 @@ int main(int argc, char* argv[])
             has_reciprocal = true;
         else if (strcmp(argv[i], "sigmoid") == 0)
             has_sigmoid = true;
+        else if (strcmp(argv[i], "naive-sigmoid") == 0)
+            has_naive_sigmoid = true;
         else if (strcmp(argv[i], "help") == 0)
             std::cout << "Usage: " << argv[0] << " [gemm|brgemm|matmul|unary|top|top-shared|top-opt|einsum|opt-einsum|reciprocal|sigmoid]" << std::endl;
         else
@@ -680,6 +686,16 @@ int main(int argc, char* argv[])
         std::ofstream                          matmul_bm("benchmarks/matmul_benchmarks.txt");
         print_throughput(bench_mnk, matmul_bm, "MatmulMNKBench 2048x2048x2048");
         print_throughput(bench_brmnk, matmul_bm, "MatmulBrMNKBench 1024x1024x1024 br=16");
+        matmul_bm.close();
+    }
+
+    if (has_naive_matmul)
+    {
+        mini_jit::benchmarks::NaiveMatmulMNKBench   bench_mnk(3.0, 2048, 2048, 2048);
+        mini_jit::benchmarks::NaiveMatmulBrMNKBench bench_brmnk(3.0, 1024, 1024, 1024, 16);
+        std::ofstream                               matmul_bm("benchmarks/naive_matmul_benchmarks.txt");
+        print_throughput(bench_mnk, matmul_bm, "NaiveMatmulMNKBench 2048x2048x2048");
+        print_throughput(bench_brmnk, matmul_bm, "NaiveMatmulBrMNKBench 1024x1024x1024 br=16");
         matmul_bm.close();
     }
 
@@ -1020,6 +1036,23 @@ int main(int argc, char* argv[])
         print_bandwidth(bench_sigmoid_interpolation_64_64, sigmoid_bm, "SigmoidInterpolationPrimitiveBench 64x64");
         print_bandwidth(bench_sigmoid_interpolation_512_512, sigmoid_bm, "SigmoidInterpolationPrimitiveBench 512x512");
         print_bandwidth(bench_sigmoid_interpolation_2048_2048, sigmoid_bm, "SigmoidInterpolationPrimitiveBench 2048x2048");
+
+        sigmoid_bm.close();
+    }
+
+    if (has_naive_sigmoid)
+    {
+        const double  RUN_TIME = 3.0;
+        std::ofstream sigmoid_bm("benchmarks/naive_sigmoid_benchmark.txt");
+
+        mini_jit::benchmarks::NaiveSigmoidPrimitiveBench bench_naive_sigmoid_50_50(RUN_TIME, 50, 50);
+        mini_jit::benchmarks::NaiveSigmoidPrimitiveBench bench_naive_sigmoid_64_64(RUN_TIME, 64, 64);
+        mini_jit::benchmarks::NaiveSigmoidPrimitiveBench bench_naive_sigmoid_512_512(RUN_TIME, 512, 512);
+        mini_jit::benchmarks::NaiveSigmoidPrimitiveBench bench_naive_sigmoid_2048_2048(RUN_TIME, 2048, 2048);
+        print_bandwidth(bench_naive_sigmoid_50_50, sigmoid_bm, "NaiveSigmoidPrimitiveBench 50x50");
+        print_bandwidth(bench_naive_sigmoid_64_64, sigmoid_bm, "NaiveSigmoidPrimitiveBench 64x64");
+        print_bandwidth(bench_naive_sigmoid_512_512, sigmoid_bm, "NaiveSigmoidPrimitiveBench 512x512");
+        print_bandwidth(bench_naive_sigmoid_2048_2048, sigmoid_bm, "NaiveSigmoidPrimitiveBench 2048x2048");
 
         sigmoid_bm.close();
     }

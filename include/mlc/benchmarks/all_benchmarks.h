@@ -5,9 +5,12 @@
 #include <mlc/benchmarks/TensorOperation.bench.h>
 #include <mlc/benchmarks/matmul/Matmul_br_m_n_k.bench.h>
 #include <mlc/benchmarks/matmul/Matmul_m_n_k.bench.h>
+#include <mlc/benchmarks/matmul/naive_matmul_br_m_n_k.bench.h>
+#include <mlc/benchmarks/matmul/naive_matmul_m_n_k.bench.h>
 #include <mlc/benchmarks/unary/fast_sigmoid_primitive.bench.h>
 #include <mlc/benchmarks/unary/identity_primitive.bench.h>
 #include <mlc/benchmarks/unary/identity_trans_primitive.bench.h>
+#include <mlc/benchmarks/unary/naive_sigmoid_primitive.bench.h>
 #include <mlc/benchmarks/unary/reciprocal_primitive.bench.h>
 #include <mlc/benchmarks/unary/relu_primitive.bench.h>
 #include <mlc/benchmarks/unary/relu_trans_primitive.bench.h>
